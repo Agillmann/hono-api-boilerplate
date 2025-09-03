@@ -1,0 +1,63 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: api-boilerplate-mysql
+    restart: unless-stopped
+    command:
+      - --default-authentication-plugin=caching_sha2_password
+      - --skip-host-cache
+      - --skip-name-resolve
+      - --explicit_defaults_for_timestamp=ON
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - api-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD}",
+        ]
+      timeout: 30s
+      retries: 15
+      interval: 5s
+      start_period: 60s
+
+  # Uncomment the following service if you want to run your API in Docker as well
+  # api:
+  #   build: .
+  #   container_name: api-boilerplate-app
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${APP_PORT:-3000}:3000"
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-development}
+  #     - PORT=${APP_PORT:-3000}
+  #     - DATABASE_URL=${DATABASE_URL}
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #   networks:
+  #     - api-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  api-network:
+    driver: bridge

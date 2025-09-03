@@ -1,0 +1,297 @@
+import type { Context, MiddlewareHandler } from "hono";
+import { HTTPException } from "hono/http-exception";
+import type { RBACContext } from "../auth";
+import { auth } from "../auth";
+import { hasPermission, hasOrganizationPermission, type AppRole, type OrgRole } from "../permissions";
+
+// Permission checking interface
+interface PermissionCheck {
+	resource: string;
+	action: string;
+}
+
+/**
+ * Middleware to require specific app-level permissions
+ */
+export function requirePermission(
+	resource: string,
+	action: string,
+): MiddlewareHandler<{ Variables: RBACContext }> {
+	return async (c, next) => {
+		const user = c.get("user");
+		const session = c.get("session");
+
+		if (!user || !session) {
+			throw new HTTPException(401, { message: "Authentication required" });
+		}
+
+		try {
+			// Get user role from database or user object
+			const userRole = (user as any).role || "user" as AppRole;
+			
+			// Check if user has the required permission
+			if (!hasPermission(userRole, resource as any, action)) {
+				throw new HTTPException(403, {
+					message: `Insufficient permissions: ${resource}.${action}`,
+				});
+			}
+
+			await next();
+		} catch (error) {
+			console.error("Permission check failed:", error);
+			throw new HTTPException(500, { message: "Permission check failed" });
+		}
+	};
+}
+
+/**
+ * Middleware to require specific role
+ */
+export function requireRole(
+	...roles: string[]
+): MiddlewareHandler<{ Variables: RBACContext }> {
+	return async (c, next) => {
+		const user = c.get("user");
+
+		if (!user) {
+			throw new HTTPException(401, { message: "Authentication required" });
+		}
+
+		// Check user's role (assuming role is stored in user object)
+		const userRole = (user as any).role || "user";
+
+		if (!roles.includes(userRole)) {
+			throw new HTTPException(403, {
+				message: `Required role: ${roles.join(" or ")}. Current role: ${userRole}`,
+			});
+		}
+
+		await next();
+	};
+}
+
+/**
+ * Middleware to require organization membership
+ */
+export function requireOrganizationMember(): MiddlewareHandler<{
+	Variables: RBACContext;
+}> {
+	return async (c, next) => {
+		const user = c.get("user");
+		let organizationId = c.get("organizationId");
+
+		if (!user) {
+			throw new HTTPException(401, { message: "Authentication required" });
+		}
+
+		// Try to get organization ID from route params if not set in context
+		if (!organizationId) {
+			organizationId = c.req.param("organizationId");
+		}
+
+		if (!organizationId) {
+			throw new HTTPException(400, { message: "Organization ID required" });
+		}
+
+		try {
+			// Check organization membership using Better Auth's organization API
+			const membership = await auth.api.getFullOrganization({
+				body: { organizationId },
+				headers: c.req.raw.headers,
+			});
+
+			if (!membership || !membership.members?.length) {
+				throw new HTTPException(403, {
+					message: "Not a member of this organization",
+				});
+			}
+
+			// Set organization context for downstream middleware
+			c.set("organizationId", organizationId);
+			c.set("organizationRole", membership.members[0]?.role || "member");
+
+			await next();
+		} catch (error) {
+			console.error("Organization membership check failed:", error);
+			throw new HTTPException(403, {
+				message: "Organization access denied",
+			});
+		}
+	};
+}
+
+/**
+ * Middleware to require organization permission
+ */
+export function requireOrganizationPermission(
+	resource: string,
+	action: string,
+): MiddlewareHandler<{ Variables: RBACContext }> {
+	return async (c, next) => {
+		const user = c.get("user");
+		let organizationId = c.get("organizationId");
+
+		if (!user) {
+			throw new HTTPException(401, { message: "Authentication required" });
+		}
+
+		// Try to get organization ID from route params if not set in context
+		if (!organizationId) {
+			organizationId = c.req.param("organizationId");
+		}
+
+		if (!organizationId) {
+			throw new HTTPException(400, { message: "Organization ID required" });
+		}
+
+		try {
+			// Get user's organization role
+			const membership = await auth.api.getFullOrganization({
+				body: { organizationId },
+				headers: c.req.raw.headers,
+			});
+
+			if (!membership || !membership.members?.length) {
+				throw new HTTPException(403, {
+					message: "Not a member of this organization",
+				});
+			}
+
+			const userOrgRole = membership.members[0]?.role || "member" as OrgRole;
+			
+			// Check if user has the required organization permission
+			if (!hasOrganizationPermission(userOrgRole, resource as any, action)) {
+				throw new HTTPException(403, {
+					message: `Insufficient organization permissions: ${resource}.${action}`,
+				});
+			}
+
+			// Set organization context
+			c.set("organizationId", organizationId);
+
+			await next();
+		} catch (error) {
+			console.error("Organization permission check failed:", error);
+			throw new HTTPException(403, {
+				message: "Organization permission denied",
+			});
+		}
+	};
+}
+
+/**
+ * Middleware to require organization role
+ */
+export function requireOrganizationRole(
+	...roles: string[]
+): MiddlewareHandler<{ Variables: RBACContext }> {
+	return async (c, next) => {
+		const user = c.get("user");
+		let organizationId = c.get("organizationId");
+
+		if (!user) {
+			throw new HTTPException(401, { message: "Authentication required" });
+		}
+
+		if (!organizationId) {
+			organizationId = c.req.param("organizationId");
+		}
+
+		if (!organizationId) {
+			throw new HTTPException(400, { message: "Organization ID required" });
+		}
+
+		try {
+			// Get organization membership details
+			const membership = await auth.api.getFullOrganization({
+				body: { organizationId },
+				headers: c.req.raw.headers,
+			});
+
+			if (!membership || !membership.members?.length) {
+				throw new HTTPException(403, {
+					message: "Not a member of this organization",
+				});
+			}
+
+			const userRole = membership.members[0]?.role || "member";
+
+			if (!roles.includes(userRole)) {
+				throw new HTTPException(403, {
+					message: `Required organization role: ${roles.join(" or ")}. Current role: ${userRole}`,
+				});
+			}
+
+			// Set context
+			c.set("organizationId", organizationId);
+			c.set("organizationRole", userRole);
+
+			await next();
+		} catch (error) {
+			console.error("Organization role check failed:", error);
+			throw new HTTPException(403, {
+				message: "Organization role check failed",
+			});
+		}
+	};
+}
+
+/**
+ * Utility function to check permissions in route handlers
+ */
+export async function checkPermission(
+	c: Context<{ Variables: RBACContext }>,
+	resource: string,
+	action: string,
+): Promise<boolean> {
+	const user = c.get("user");
+
+	if (!user) {
+		return false;
+	}
+
+	try {
+		const result = await auth.api.hasPermission({
+			body: {
+				permission: { [resource]: [action] },
+			},
+			headers: c.req.raw.headers,
+		});
+		return result.success || false;
+	} catch (error) {
+		console.error("Permission check failed:", error);
+		return false;
+	}
+}
+
+/**
+ * Utility function to check organization permissions in route handlers
+ */
+export async function checkOrganizationPermission(
+	c: Context<{ Variables: RBACContext }>,
+	resource: string,
+	action: string,
+	organizationId?: string,
+): Promise<boolean> {
+	const user = c.get("user");
+	const orgId =
+		organizationId || c.get("organizationId") || c.req.param("organizationId");
+
+	if (!user || !orgId) {
+		return false;
+	}
+
+	try {
+		const result = await auth.api.hasPermission({
+			body: {
+				organizationId: orgId,
+				permission: { [resource]: [action] },
+			},
+			headers: c.req.raw.headers,
+		});
+		return result.success || false;
+	} catch (error) {
+		console.error("Organization permission check failed:", error);
+		return false;
+	}
+}

@@ -19,3 +19,8 @@ mysql_data/
 # generated
 /prisma/generated/prisma-client
 /generated
+
+# Logs
+logs/
+logs/*
+*.log

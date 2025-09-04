@@ -40,8 +40,9 @@
 				"*.d.ts",
 				"docs/**",
 				"mysql/**",
-				"src/prisma/migrations/**",
-				"src/prisma/generated/**"
+				"prisma/migrations/**",
+				"prisma/generated/**",
+				"generated/**"
 			],
 			"linter": {
 				"enabled": false

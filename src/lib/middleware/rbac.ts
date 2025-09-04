@@ -1,6 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
+import { errorLogger, logError } from "../../services/logger";
 import type { RBACContext } from "../auth";
 import { auth } from "../auth";
 import {
@@ -44,7 +45,12 @@ export function requirePermission(
 
 			await next();
 		} catch (error) {
-			console.error("Permission check failed:", error);
+			logError(error as Error, {
+				operation: "permission_check",
+				resource,
+				action,
+				user: c.get("user"),
+			});
 			throw new HTTPException(500, { message: "Permission check failed" });
 		}
 	};
@@ -123,7 +129,11 @@ export function requireOrganizationMember(): MiddlewareHandler<{
 
 			await next();
 		} catch (error) {
-			console.error("Organization membership check failed:", error);
+			logError(error as Error, {
+				operation: "organization_membership_check",
+				organizationId: c.req.param("organizationId"),
+				user: c.get("user"),
+			});
 			throw new HTTPException(403, {
 				message: "Organization access denied",
 			});
@@ -193,7 +203,13 @@ export function requireOrganizationPermission(
 
 			await next();
 		} catch (error) {
-			console.error("Organization permission check failed:", error);
+			logError(error as Error, {
+				operation: "organization_permission_check",
+				resource,
+				action,
+				organizationId: c.req.param("organizationId"),
+				user: c.get("user"),
+			});
 			throw new HTTPException(403, {
 				message: "Organization permission denied",
 			});
@@ -255,7 +271,12 @@ export function requireOrganizationRole(
 
 			await next();
 		} catch (error) {
-			console.error("Organization role check failed:", error);
+			logError(error as Error, {
+				operation: "organization_role_check",
+				requiredRole,
+				organizationId: c.req.param("organizationId"),
+				user: c.get("user"),
+			});
 			throw new HTTPException(403, {
 				message: "Organization role check failed",
 			});
@@ -286,7 +307,12 @@ export async function checkPermission(
 		});
 		return result.success || false;
 	} catch (error) {
-		console.error("Permission check failed:", error);
+		logError(error as Error, {
+			operation: "simple_permission_check",
+			resource,
+			action,
+			user: c.get("user"),
+		});
 		return false;
 	}
 }
@@ -318,7 +344,13 @@ export async function checkOrganizationPermission(
 		});
 		return result.success || false;
 	} catch (error) {
-		console.error("Organization permission check failed:", error);
+		logError(error as Error, {
+			operation: "simple_organization_permission_check",
+			resource,
+			action,
+			organizationId: orgId,
+			user: user,
+		});
 		return false;
 	}
 }

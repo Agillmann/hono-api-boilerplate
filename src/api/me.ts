@@ -5,6 +5,7 @@ import { prisma } from "prisma/prisma-client";
 import { z } from "zod";
 import type { AuthType } from "../lib/auth";
 import { getUserOrganizations, getUserWithRole } from "../lib/utils/rbac";
+import { apiLogger, logError } from "../services/logger";
 
 const meRouter = new Hono<{ Variables: AuthType }>();
 
@@ -38,7 +39,10 @@ meRouter.get("/", async (c) => {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to fetch user profile:", error);
+		logError(error as Error, {
+			operation: "fetch_user_profile",
+			userId: user.id,
+		});
 		throw new HTTPException(500, { message: "Failed to fetch user profile" });
 	}
 });
@@ -74,7 +78,11 @@ meRouter.put("/", zValidator("json", updateProfileSchema), async (c) => {
 
 		return c.json({ user: updatedUser });
 	} catch (error) {
-		console.error("Failed to update user profile:", error);
+		logError(error as Error, {
+			operation: "update_user_profile",
+			userId: user.id,
+			updateData: data,
+		});
 		throw new HTTPException(500, { message: "Failed to update user profile" });
 	}
 });
@@ -93,7 +101,10 @@ meRouter.get("/organizations", async (c) => {
 		const organizations = await getUserOrganizations(user.id);
 		return c.json({ organizations });
 	} catch (error) {
-		console.error("Failed to fetch user organizations:", error);
+		logError(error as Error, {
+			operation: "fetch_user_organizations",
+			userId: user.id,
+		});
 		throw new HTTPException(500, {
 			message: "Failed to fetch user organizations",
 		});
@@ -135,7 +146,10 @@ meRouter.get("/teams", async (c) => {
 
 		return c.json({ teams: teamMemberships });
 	} catch (error) {
-		console.error("Failed to fetch user teams:", error);
+		logError(error as Error, {
+			operation: "fetch_user_teams",
+			userId: user.id,
+		});
 		throw new HTTPException(500, { message: "Failed to fetch user teams" });
 	}
 });
@@ -177,7 +191,10 @@ meRouter.get("/invitations", async (c) => {
 
 		return c.json({ invitations });
 	} catch (error) {
-		console.error("Failed to fetch user invitations:", error);
+		logError(error as Error, {
+			operation: "fetch_user_invitations",
+			userId: user.id,
+		});
 		throw new HTTPException(500, {
 			message: "Failed to fetch user invitations",
 		});

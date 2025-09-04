@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import type { member, Organization } from "prisma/generated/prisma-client";
 import { prisma } from "prisma/prisma-client";
+import { logError } from "../../services/logger";
 import type { RBACContext } from "../auth";
 import { auth } from "../auth";
 
@@ -49,7 +50,10 @@ export async function getUserWithRole(
 
 		return user;
 	} catch (error) {
-		console.error("Failed to get user with role:", error);
+		logError(error as Error, {
+			operation: "get_user_with_role",
+			userId,
+		});
 		return null;
 	}
 }
@@ -76,7 +80,10 @@ export async function getUserOrganizations(
 
 		return memberships;
 	} catch (error) {
-		console.error("Failed to get user organizations:", error);
+		logError(error as Error, {
+			operation: "get_user_organizations",
+			userId,
+		});
 		return [];
 	}
 }
@@ -93,7 +100,10 @@ export async function isAdmin(userId: string): Promise<boolean> {
 
 		return user?.role === "admin" && !user?.banned;
 	} catch (error) {
-		console.error("Failed to check admin status:", error);
+		logError(error as Error, {
+			operation: "check_admin_status",
+			userId,
+		});
 		return false;
 	}
 }
@@ -118,7 +128,11 @@ export async function isOrganizationOwnerOrAdmin(
 
 		return membership?.role === "owner" || membership?.role === "admin";
 	} catch (error) {
-		console.error("Failed to check organization ownership:", error);
+		logError(error as Error, {
+			operation: "check_organization_ownership",
+			userId,
+			organizationId,
+		});
 		return false;
 	}
 }
@@ -157,7 +171,11 @@ export async function getOrganizationWithUserRole(
 			teamCount: organization._count.teams,
 		};
 	} catch (error) {
-		console.error("Failed to get organization with user role:", error);
+		logError(error as Error, {
+			operation: "get_organization_with_user_role",
+			organizationId,
+			userId,
+		});
 		return null;
 	}
 }
@@ -264,7 +282,13 @@ export async function canPerformAction(
 		});
 		return result.success || false;
 	} catch (error) {
-		console.error("Failed to check action permission:", error);
+		logError(error as Error, {
+			operation: "check_action_permission",
+			user,
+			resource,
+			action,
+			organizationId,
+		});
 		return false;
 	}
 }
@@ -296,7 +320,10 @@ export async function getUserAccessibleOrganizations(userId: string) {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to get accessible organizations:", error);
+		logError(error as Error, {
+			operation: "get_accessible_organizations",
+			userId,
+		});
 		return [];
 	}
 }

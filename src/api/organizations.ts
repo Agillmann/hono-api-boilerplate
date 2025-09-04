@@ -13,8 +13,8 @@ import {
 import {
 	getOrganizationWithUserRole,
 	getUserAccessibleOrganizations,
-	validateOrganizationAccess,
 } from "../lib/utils/rbac";
+import { apiLogger, logError } from "../services/logger";
 
 const organizationRouter = new Hono<{ Variables: RBACContext }>();
 
@@ -62,7 +62,10 @@ organizationRouter.get("/", async (c) => {
 
 		return c.json({ organizations });
 	} catch (error) {
-		console.error("Failed to fetch organizations:", error);
+		logError(error as Error, {
+			operation: "fetch_user_organizations",
+			userId: user.id,
+		});
 		throw new HTTPException(500, { message: "Failed to fetch organizations" });
 	}
 });
@@ -105,7 +108,11 @@ organizationRouter.post(
 
 			return c.json({ organization }, 201);
 		} catch (error) {
-			console.error("Failed to create organization:", error);
+			logError(error as Error, {
+				operation: "create_organization",
+				userId: user.id,
+				organizationData: { name: data.name, slug: data.slug },
+			});
 			throw new HTTPException(500, {
 				message: "Failed to create organization",
 			});
@@ -139,7 +146,11 @@ organizationRouter.get(
 
 			return c.json({ organization });
 		} catch (error) {
-			console.error("Failed to fetch organization:", error);
+			logError(error as Error, {
+				operation: "fetch_organization_details",
+				userId: user.id,
+				organizationId,
+			});
 			throw new HTTPException(500, { message: "Failed to fetch organization" });
 		}
 	},
@@ -172,7 +183,11 @@ organizationRouter.put(
 
 			return c.json({ organization });
 		} catch (error) {
-			console.error("Failed to update organization:", error);
+			logError(error as Error, {
+				operation: "update_organization",
+				organizationId,
+				updateData: data,
+			});
 			throw new HTTPException(500, {
 				message: "Failed to update organization",
 			});
@@ -198,7 +213,10 @@ organizationRouter.delete(
 
 			return c.json({ message: "Organization deleted successfully" });
 		} catch (error) {
-			console.error("Failed to delete organization:", error);
+			logError(error as Error, {
+				operation: "delete_organization",
+				organizationId,
+			});
 			throw new HTTPException(500, {
 				message: "Failed to delete organization",
 			});
@@ -237,7 +255,10 @@ organizationRouter.get(
 
 			return c.json({ members });
 		} catch (error) {
-			console.error("Failed to fetch members:", error);
+			logError(error as Error, {
+				operation: "fetch_organization_members",
+				organizationId,
+			});
 			throw new HTTPException(500, { message: "Failed to fetch members" });
 		}
 	},
@@ -272,7 +293,12 @@ organizationRouter.post(
 
 			return c.json({ invitation }, 201);
 		} catch (error) {
-			console.error("Failed to invite member:", error);
+			logError(error as Error, {
+				operation: "invite_member",
+				organizationId,
+				inviteData: { email, role },
+				inviterId: user.id,
+			});
 			throw new HTTPException(500, { message: "Failed to invite member" });
 		}
 	},
@@ -308,7 +334,13 @@ organizationRouter.put(
 
 			return c.json({ member });
 		} catch (error) {
-			console.error("Failed to update member role:", error);
+			logError(error as Error, {
+				operation: "update_member_role",
+				organizationId,
+				memberId,
+				newRole: role,
+				updatedBy: user.id,
+			});
 			throw new HTTPException(500, { message: "Failed to update member role" });
 		}
 	},
@@ -336,7 +368,11 @@ organizationRouter.delete(
 
 			return c.json({ message: "Member removed successfully" });
 		} catch (error) {
-			console.error("Failed to remove member:", error);
+			logError(error as Error, {
+				operation: "remove_member",
+				organizationId,
+				memberId,
+			});
 			throw new HTTPException(500, { message: "Failed to remove member" });
 		}
 	},
@@ -372,7 +408,10 @@ organizationRouter.get(
 
 			return c.json({ invitations });
 		} catch (error) {
-			console.error("Failed to fetch invitations:", error);
+			logError(error as Error, {
+				operation: "fetch_organization_invitations",
+				organizationId,
+			});
 			throw new HTTPException(500, { message: "Failed to fetch invitations" });
 		}
 	},
@@ -398,7 +437,11 @@ organizationRouter.delete(
 
 			return c.json({ message: "Invitation cancelled successfully" });
 		} catch (error) {
-			console.error("Failed to cancel invitation:", error);
+			logError(error as Error, {
+				operation: "cancel_invitation",
+				organizationId,
+				invitationId,
+			});
 			throw new HTTPException(500, { message: "Failed to cancel invitation" });
 		}
 	},
@@ -432,7 +475,10 @@ organizationRouter.get(
 
 			return c.json({ teams });
 		} catch (error) {
-			console.error("Failed to fetch teams:", error);
+			logError(error as Error, {
+				operation: "fetch_organization_teams",
+				organizationId,
+			});
 			throw new HTTPException(500, { message: "Failed to fetch teams" });
 		}
 	},
@@ -466,7 +512,11 @@ organizationRouter.post(
 
 			return c.json({ team }, 201);
 		} catch (error) {
-			console.error("Failed to create team:", error);
+			logError(error as Error, {
+				operation: "create_team",
+				organizationId,
+				teamData: { name },
+			});
 			throw new HTTPException(500, { message: "Failed to create team" });
 		}
 	},
@@ -510,7 +560,11 @@ organizationRouter.get(
 
 			return c.json({ team });
 		} catch (error) {
-			console.error("Failed to fetch team:", error);
+			logError(error as Error, {
+				operation: "fetch_team_details",
+				organizationId,
+				teamId,
+			});
 			throw new HTTPException(500, { message: "Failed to fetch team" });
 		}
 	},
@@ -536,7 +590,11 @@ organizationRouter.delete(
 
 			return c.json({ message: "Team deleted successfully" });
 		} catch (error) {
-			console.error("Failed to delete team:", error);
+			logError(error as Error, {
+				operation: "delete_team",
+				organizationId,
+				teamId,
+			});
 			throw new HTTPException(500, { message: "Failed to delete team" });
 		}
 	},

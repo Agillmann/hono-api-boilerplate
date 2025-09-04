@@ -1,4 +1,4 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 import type { RBACContext } from "./auth";
 
@@ -62,7 +62,7 @@ The API uses Better-Auth for authentication with session-based access control.
 		`,
 		contact: {
 			name: "API Support",
-			url: "https://github.com/your-org/api-boilerplate",
+			url: "https://github.com/agillmann/api-boilerplate",
 		},
 		license: {
 			name: "MIT",
@@ -119,7 +119,8 @@ The API uses Better-Auth for authentication with session-based access control.
 				type: "apiKey",
 				in: "cookie",
 				name: "better-auth.session_token",
-				description: "Session-based authentication using Better-Auth session cookie",
+				description:
+					"Session-based authentication using Better-Auth session cookie",
 			},
 		},
 	},
@@ -148,14 +149,20 @@ export const ValidationErrorSchema = z
 					code: z.string(),
 				}),
 			)
-			.openapi({ example: [{ path: ["name"], message: "Required", code: "invalid_type" }] }),
+			.openapi({
+				example: [
+					{ path: ["name"], message: "Required", code: "invalid_type" },
+				],
+			}),
 	})
 	.openapi("ValidationError");
 
 // Success schemas
 export const SuccessMessageSchema = z
 	.object({
-		message: z.string().openapi({ example: "Operation completed successfully" }),
+		message: z
+			.string()
+			.openapi({ example: "Operation completed successfully" }),
 	})
 	.openapi("SuccessMessage");
 
@@ -185,29 +192,33 @@ export const UserSchema = z
 	.object({
 		id: z.string().openapi({ example: "user_123" }),
 		name: z.string().openapi({ example: "John Doe" }),
-		email: z.string().email().openapi({ example: "john@example.com" }),
+		email: z.email().openapi({ example: "john@example.com" }),
 		role: z.enum(["admin", "user"]).openapi({ example: "user" }),
 		banned: z.boolean().openapi({ example: false }),
 		banReason: z.string().nullable().openapi({ example: null }),
-		banExpires: z.string().datetime().nullable().openapi({ example: null }),
-		createdAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
-		updatedAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		banExpires: z.iso.datetime().nullable().openapi({ example: null }),
+		createdAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		updatedAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
 	})
 	.openapi("User");
 
 export const CreateUserSchema = z
 	.object({
 		name: z.string().min(1).openapi({ example: "John Doe" }),
-		email: z.string().email().openapi({ example: "john@example.com" }),
+		email: z.email().openapi({ example: "john@example.com" }),
 		password: z.string().min(8).openapi({ example: "securepassword123" }),
-		role: z.enum(["admin", "user"]).optional().default("user").openapi({ example: "user" }),
+		role: z
+			.enum(["admin", "user"])
+			.optional()
+			.default("user")
+			.openapi({ example: "user" }),
 	})
 	.openapi("CreateUser");
 
 export const UpdateUserSchema = z
 	.object({
 		name: z.string().min(1).optional().openapi({ example: "John Doe" }),
-		email: z.string().email().optional().openapi({ example: "john@example.com" }),
+		email: z.email().optional().openapi({ example: "john@example.com" }),
 		role: z.enum(["admin", "user"]).optional().openapi({ example: "user" }),
 	})
 	.openapi("UpdateUser");
@@ -221,10 +232,16 @@ export const OrganizationSchema = z
 		id: z.string().openapi({ example: "org_123" }),
 		name: z.string().openapi({ example: "Acme Corporation" }),
 		slug: z.string().openapi({ example: "acme-corp" }),
-		logo: z.string().url().nullable().openapi({ example: "https://example.com/logo.png" }),
-		createdAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
-		updatedAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
-		metadata: z.record(z.unknown()).nullable().openapi({ example: {} }),
+		logo: z
+			.url()
+			.nullable()
+			.openapi({ example: "https://example.com/logo.png" }),
+		createdAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		updatedAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		metadata: z
+			.record(z.string(), z.unknown())
+			.nullable()
+			.openapi({ example: {} }),
 		memberCount: z.number().optional().openapi({ example: 5 }),
 		teamCount: z.number().optional().openapi({ example: 2 }),
 	})
@@ -234,14 +251,20 @@ export const CreateOrganizationSchema = z
 	.object({
 		name: z.string().min(1).openapi({ example: "Acme Corporation" }),
 		slug: z.string().min(1).max(255).openapi({ example: "acme-corp" }),
-		logo: z.string().url().optional().openapi({ example: "https://example.com/logo.png" }),
+		logo: z
+			.url()
+			.optional()
+			.openapi({ example: "https://example.com/logo.png" }),
 	})
 	.openapi("CreateOrganization");
 
 export const UpdateOrganizationSchema = z
 	.object({
 		name: z.string().min(1).optional().openapi({ example: "Acme Corporation" }),
-		logo: z.string().url().optional().openapi({ example: "https://example.com/logo.png" }),
+		logo: z
+			.url()
+			.optional()
+			.openapi({ example: "https://example.com/logo.png" }),
 	})
 	.openapi("UpdateOrganization");
 
@@ -255,8 +278,8 @@ export const MemberSchema = z
 		organizationId: z.string().openapi({ example: "org_123" }),
 		userId: z.string().openapi({ example: "user_123" }),
 		role: z.enum(["owner", "admin", "member"]).openapi({ example: "member" }),
-		createdAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
-		updatedAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		createdAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		updatedAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
 		user: UserSchema.optional(),
 		organization: OrganizationSchema.optional(),
 	})
@@ -264,8 +287,11 @@ export const MemberSchema = z
 
 export const InviteMemberSchema = z
 	.object({
-		email: z.string().email().openapi({ example: "john@example.com" }),
-		role: z.enum(["member", "admin"]).default("member").openapi({ example: "member" }),
+		email: z.email().openapi({ example: "john@example.com" }),
+		role: z
+			.enum(["member", "admin"])
+			.default("member")
+			.openapi({ example: "member" }),
 	})
 	.openapi("InviteMember");
 
@@ -284,8 +310,8 @@ export const TeamSchema = z
 		id: z.string().openapi({ example: "team_123" }),
 		name: z.string().openapi({ example: "Engineering" }),
 		organizationId: z.string().openapi({ example: "org_123" }),
-		createdAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
-		updatedAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		createdAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		updatedAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
 		memberCount: z.number().optional().openapi({ example: 3 }),
 	})
 	.openapi("Team");
@@ -303,13 +329,15 @@ export const CreateTeamSchema = z
 export const InvitationSchema = z
 	.object({
 		id: z.string().openapi({ example: "invitation_123" }),
-		email: z.string().email().openapi({ example: "john@example.com" }),
+		email: z.email().openapi({ example: "john@example.com" }),
 		role: z.enum(["member", "admin"]).openapi({ example: "member" }),
 		organizationId: z.string().openapi({ example: "org_123" }),
 		inviterId: z.string().openapi({ example: "user_456" }),
-		status: z.enum(["pending", "accepted", "expired"]).openapi({ example: "pending" }),
-		expiresAt: z.string().datetime().openapi({ example: "2024-02-01T00:00:00Z" }),
-		createdAt: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+		status: z
+			.enum(["pending", "accepted", "expired"])
+			.openapi({ example: "pending" }),
+		expiresAt: z.iso.datetime().openapi({ example: "2024-02-01T00:00:00Z" }),
+		createdAt: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
 		organization: OrganizationSchema.optional(),
 		inviter: UserSchema.optional(),
 	})
@@ -324,7 +352,7 @@ export const SystemStatsSchema = z
 		stats: z.object({
 			totalUsers: z.number().openapi({ example: 1250 }),
 			totalOrganizations: z.number().openapi({ example: 85 }),
-			timestamp: z.string().datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
+			timestamp: z.iso.datetime().openapi({ example: "2024-01-01T00:00:00Z" }),
 		}),
 	})
 	.openapi("SystemStats");
@@ -368,14 +396,20 @@ export const createPaginatedResponse = <T extends z.ZodTypeAny>(
 		})
 		.openapi(`Paginated${name || "Item"}Response`);
 
-export const createSingleResponse = <T extends z.ZodTypeAny>(dataSchema: T, name?: string) =>
+export const createSingleResponse = <T extends z.ZodTypeAny>(
+	dataSchema: T,
+	name?: string,
+) =>
 	z
 		.object({
 			data: dataSchema,
 		})
 		.openapi(`Single${name || "Item"}Response`);
 
-export const createListResponse = <T extends z.ZodTypeAny>(dataSchema: T, name?: string) =>
+export const createListResponse = <T extends z.ZodTypeAny>(
+	dataSchema: T,
+	name?: string,
+) =>
 	z
 		.object({
 			data: z.array(dataSchema),

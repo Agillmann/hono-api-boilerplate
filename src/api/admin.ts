@@ -5,12 +5,9 @@ import { prisma } from "prisma/prisma-client";
 import { z } from "zod";
 import type { AuthType } from "../lib/auth";
 import { auth } from "../lib/auth";
-import { requirePermission, requireRole } from "../lib/middleware/rbac";
-import {
-	getUserOrganizations,
-	getUserWithRole,
-	isAdmin,
-} from "../lib/utils/rbac";
+import { requireRole } from "../lib/middleware/rbac";
+import { getUserWithRole } from "../lib/utils/rbac";
+import { adminLogger, logAdminAction, logError } from "../services/logger";
 
 const adminRouter = new Hono<{ Variables: AuthType }>();
 
@@ -112,7 +109,11 @@ adminRouter.get("/users", async (c) => {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to fetch users:", error);
+		logError(error as Error, {
+			operation: "fetch_users",
+			adminUser: c.get("user"),
+			filters: { page, limit, search, role, banned },
+		});
 		throw new HTTPException(500, { message: "Failed to fetch users" });
 	}
 });
@@ -164,7 +165,11 @@ adminRouter.get("/users/:id", async (c) => {
 
 		return c.json({ user });
 	} catch (error) {
-		console.error("Failed to fetch user:", error);
+		logError(error as Error, {
+			operation: "fetch_user_details",
+			adminUser: c.get("user"),
+			targetUserId: userId,
+		});
 		throw new HTTPException(500, { message: "Failed to fetch user" });
 	}
 });
@@ -200,9 +205,16 @@ adminRouter.post("/users", zValidator("json", createUserSchema), async (c) => {
 			});
 		}
 
+		logAdminAction("create_user", c.get("user"), `user:${data.email}`, {
+			userRole: data.role,
+		});
 		return c.json({ user: result.user }, 201);
 	} catch (error) {
-		console.error("Failed to create user:", error);
+		logError(error as Error, {
+			operation: "create_user",
+			adminUser: c.get("user"),
+			userData: { email: data.email, role: data.role },
+		});
 		throw new HTTPException(500, { message: "Failed to create user" });
 	}
 });
@@ -247,9 +259,17 @@ adminRouter.put(
 				},
 			});
 
+			logAdminAction("update_user", c.get("user"), `user:${userId}`, {
+				updates: data,
+			});
 			return c.json({ user });
 		} catch (error) {
-			console.error("Failed to update user:", error);
+			logError(error as Error, {
+				operation: "update_user",
+				adminUser: c.get("user"),
+				targetUserId: userId,
+				updates: data,
+			});
 			throw new HTTPException(500, { message: "Failed to update user" });
 		}
 	},
@@ -280,9 +300,18 @@ adminRouter.post(
 			});
 
 			const user = await getUserWithRole(userId);
+			logAdminAction("ban_user", c.get("user"), `user:${userId}`, {
+				reason,
+				expiresAt,
+			});
 			return c.json({ user });
 		} catch (error) {
-			console.error("Failed to ban user:", error);
+			logError(error as Error, {
+				operation: "ban_user",
+				adminUser: c.get("user"),
+				targetUserId: userId,
+				banData: { reason, expiresAt },
+			});
 			throw new HTTPException(500, { message: "Failed to ban user" });
 		}
 	},
@@ -300,10 +329,15 @@ adminRouter.post("/users/:id/unban", async (c) => {
 			headers: c.req.raw.headers,
 		});
 
+		logAdminAction("unban_user", c.get("user"), `user:${userId}`);
 		const user = await getUserWithRole(userId);
 		return c.json({ user });
 	} catch (error) {
-		console.error("Failed to unban user:", error);
+		logError(error as Error, {
+			operation: "unban_user",
+			adminUser: c.get("user"),
+			targetUserId: userId,
+		});
 		throw new HTTPException(500, { message: "Failed to unban user" });
 	}
 });
@@ -325,9 +359,14 @@ adminRouter.delete("/users/:id", async (c) => {
 			where: { id: userId },
 		});
 
+		logAdminAction("delete_user", c.get("user"), `user:${userId}`);
 		return c.json({ message: "User deleted successfully" });
 	} catch (error) {
-		console.error("Failed to delete user:", error);
+		logError(error as Error, {
+			operation: "delete_user",
+			adminUser: c.get("user"),
+			targetUserId: userId,
+		});
 		throw new HTTPException(500, { message: "Failed to delete user" });
 	}
 });
@@ -382,7 +421,11 @@ adminRouter.get("/organizations", async (c) => {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to fetch organizations:", error);
+		logError(error as Error, {
+			operation: "fetch_organizations",
+			adminUser: c.get("user"),
+			filters: { page, limit, search },
+		});
 		throw new HTTPException(500, { message: "Failed to fetch organizations" });
 	}
 });
@@ -447,7 +490,11 @@ adminRouter.get("/organizations/:id", async (c) => {
 
 		return c.json({ organization });
 	} catch (error) {
-		console.error("Failed to fetch organization:", error);
+		logError(error as Error, {
+			operation: "fetch_organization_details",
+			adminUser: c.get("user"),
+			targetOrganizationId: organizationId,
+		});
 		throw new HTTPException(500, { message: "Failed to fetch organization" });
 	}
 });
@@ -493,9 +540,26 @@ adminRouter.post(
 				headers: c.req.raw.headers,
 			});
 
+			logAdminAction(
+				"create_organization",
+				c.get("user"),
+				`organization:${data.slug}`,
+				{
+					name: data.name,
+					ownerId: data.ownerId,
+				},
+			);
 			return c.json({ organization }, 201);
 		} catch (error) {
-			console.error("Failed to create organization:", error);
+			logError(error as Error, {
+				operation: "create_organization",
+				adminUser: c.get("user"),
+				organizationData: {
+					name: data.name,
+					slug: data.slug,
+					ownerId: data.ownerId,
+				},
+			});
 			throw new HTTPException(500, {
 				message: "Failed to create organization",
 			});
@@ -516,9 +580,18 @@ adminRouter.delete("/organizations/:id", async (c) => {
 			headers: c.req.raw.headers,
 		});
 
+		logAdminAction(
+			"delete_organization",
+			c.get("user"),
+			`organization:${organizationId}`,
+		);
 		return c.json({ message: "Organization deleted successfully" });
 	} catch (error) {
-		console.error("Failed to delete organization:", error);
+		logError(error as Error, {
+			operation: "delete_organization",
+			adminUser: c.get("user"),
+			targetOrganizationId: organizationId,
+		});
 		throw new HTTPException(500, { message: "Failed to delete organization" });
 	}
 });
@@ -579,7 +652,10 @@ adminRouter.get("/stats", async (c) => {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to fetch stats:", error);
+		logError(error as Error, {
+			operation: "fetch_admin_stats",
+			adminUser: c.get("user"),
+		});
 		throw new HTTPException(500, { message: "Failed to fetch statistics" });
 	}
 });

@@ -1,18 +1,18 @@
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
-import type { RBACContext } from "../lib/auth";
 import { auth } from "../lib/auth";
+import { requirePermission, requireRole } from "../lib/middleware/rbac";
 import {
 	CommonResponses,
-	createRoute,
 	createOpenAPIApp,
+	createRoute,
 	DatabaseHealthSchema,
 	ErrorSchema,
 	HealthSchema,
 	SystemStatsSchema,
 	UserCountSchema,
 } from "../lib/openapi";
-import { requirePermission, requireRole } from "../lib/middleware/rbac";
+import { logError, systemLogger } from "../services/logger";
 
 // Create OpenAPI router
 const apiRouter = createOpenAPIApp();
@@ -81,7 +81,7 @@ apiRouter.openapi(healthDbRoute, async (c) => {
 		await prisma.$connect();
 		return c.json({ status: "Database connected successfully" }, 200);
 	} catch (error) {
-		console.error("Database connection failed:", error);
+		logError(error as Error, { operation: "database_health_check" });
 		throw new HTTPException(500, { message: "Database connection failed" });
 	}
 });
@@ -98,7 +98,8 @@ const systemStatsRoute = createRoute({
 	path: "/system/stats",
 	tags: ["System"],
 	summary: "Public System Statistics",
-	description: "Get public system statistics including user and organization counts",
+	description:
+		"Get public system statistics including user and organization counts",
 	responses: {
 		200: {
 			content: {
@@ -129,7 +130,7 @@ apiRouter.openapi(systemStatsRoute, async (c) => {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to fetch system stats:", error);
+		logError(error as Error, { operation: "fetch_system_stats" });
 		throw new HTTPException(500, { message: "Failed to fetch system stats" });
 	}
 });
@@ -176,7 +177,10 @@ apiRouter.openapi(
 				bannedUsers,
 			});
 		} catch (error) {
-			console.error("Failed to fetch user count:", error);
+			logError(error as Error, {
+				operation: "fetch_user_count",
+				user: c.get("user"),
+			});
 			throw new HTTPException(500, { message: "Failed to fetch user count" });
 		}
 	},
@@ -199,7 +203,10 @@ const adminOnlyRoute = createRoute({
 					schema: {
 						type: "object",
 						properties: {
-							message: { type: "string", example: "This is an admin-only endpoint" },
+							message: {
+								type: "string",
+								example: "This is an admin-only endpoint",
+							},
 							user: {
 								type: "object",
 								properties: {
@@ -270,7 +277,10 @@ const permissionsRoute = createRoute({
 										id: { type: "string" },
 										organizationId: { type: "string" },
 										userId: { type: "string" },
-										role: { type: "string", enum: ["owner", "admin", "member"] },
+										role: {
+											type: "string",
+											enum: ["owner", "admin", "member"],
+										},
 										organization: {
 											type: "object",
 											properties: {
@@ -332,7 +342,10 @@ apiRouter.openapi(permissionsRoute, async (c) => {
 				userWithRole?.role === "admin" && !userWithRole?.banned,
 		});
 	} catch (error) {
-		console.error("Failed to fetch user permissions:", error);
+		logError(error as Error, {
+			operation: "fetch_user_permissions",
+			user: c.get("user"),
+		});
 		throw new HTTPException(500, {
 			message: "Failed to fetch user permissions",
 		});
@@ -355,7 +368,7 @@ apiRouter.use("*", async (c, next) => {
 		}
 	} catch (error) {
 		// Session parsing failed, continue without session
-		console.log("Session parsing failed:", error);
+		systemLogger.debug({ err: error }, "Session parsing failed");
 	}
 
 	await next();

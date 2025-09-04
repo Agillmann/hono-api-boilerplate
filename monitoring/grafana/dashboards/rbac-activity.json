@@ -1,0 +1,655 @@
+{
+	"annotations": {
+		"list": [
+			{
+				"builtIn": 1,
+				"datasource": {
+					"type": "grafana",
+					"uid": "-- Grafana --"
+				},
+				"enable": true,
+				"hide": true,
+				"iconColor": "rgba(0, 211, 255, 1)",
+				"name": "Annotations & Alerts",
+				"type": "dashboard"
+			}
+		]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"id": null,
+	"links": [],
+	"liveNow": false,
+	"panels": [
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 0,
+				"y": 0
+			},
+			"id": 1,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({path=~\"/api/v1/organizations.*\"} [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Organization Operations",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 6,
+				"y": 0
+			},
+			"id": 2,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({path=~\"/api/v1/organizations/.*/invite\"} [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Member Invitations",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 12,
+				"y": 0
+			},
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({path=~\"/api/v1/organizations/.*/teams.*\"} [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Team Operations",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 5
+							},
+							{
+								"color": "red",
+								"value": 20
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 18,
+				"y": 0
+			},
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({path=~\"/api/v1/organizations/.*/members.*\"} |~ \"DELETE\" [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Member Removals",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 8
+			},
+			"id": 5,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum by (method) (rate({path=~\"/api/v1/organizations.*\"} | json [$__interval]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Organization Activity by Method",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 8
+			},
+			"id": 6,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{path=~\"/api/v1/organizations.*\"} |~ \"POST\" | json | line_format \"{{.time}} - {{.method}} {{.path}} ({{.statusCode}}) by {{.userId}}\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Organization Creation & Updates",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 16
+			},
+			"id": 7,
+			"options": {
+				"legend": {
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum by (statusCode) (count_over_time({path=~\"/api/v1/organizations.*\"} | json [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Organization Endpoint Status Codes",
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 16
+			},
+			"id": 8,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{path=~\"/api/v1/organizations/.*/invite\"} | json | line_format \"{{.time}} - Invitation to {{.path}} by {{.userId}} ({{.statusCode}})\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Member Invitation Activity",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 24,
+				"x": 0,
+				"y": 24
+			},
+			"id": 9,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{path=~\"/api/v1/organizations.*\"} |~ \"403|401\" | json | line_format \"{{.time}} - RBAC Denied: {{.method}} {{.path}} ({{.statusCode}}) by {{.userId}}\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "RBAC Permission Denials",
+			"type": "table"
+		}
+	],
+	"refresh": "30s",
+	"schemaVersion": 39,
+	"tags": ["rbac", "organization", "permissions"],
+	"templating": {
+		"list": []
+	},
+	"time": {
+		"from": "now-1h",
+		"to": "now"
+	},
+	"timepicker": {},
+	"timezone": "",
+	"title": "RBAC Activity Dashboard",
+	"uid": "rbac-activity",
+	"version": 1,
+	"weekStart": ""
+}

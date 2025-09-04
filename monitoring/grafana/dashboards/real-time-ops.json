@@ -1,0 +1,696 @@
+{
+	"annotations": {
+		"list": [
+			{
+				"builtIn": 1,
+				"datasource": {
+					"type": "grafana",
+					"uid": "-- Grafana --"
+				},
+				"enable": true,
+				"hide": true,
+				"iconColor": "rgba(0, 211, 255, 1)",
+				"name": "Annotations & Alerts",
+				"type": "dashboard"
+			}
+		]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"id": null,
+	"links": [],
+	"liveNow": true,
+	"panels": [
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 10
+							},
+							{
+								"color": "red",
+								"value": 50
+							}
+						]
+					},
+					"unit": "reqps"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 6,
+				"x": 0,
+				"y": 0
+			},
+			"id": 1,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(rate({component=\"api\"} [1m]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Current RPS",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 500
+							},
+							{
+								"color": "red",
+								"value": 1000
+							}
+						]
+					},
+					"unit": "ms"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 6,
+				"x": 6,
+				"y": 0
+			},
+			"id": 2,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "avg_over_time({component=\"api\"} | json | unwrap duration [1m])",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Current Avg Response",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 5
+							},
+							{
+								"color": "red",
+								"value": 20
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 6,
+				"x": 12,
+				"y": 0
+			},
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "count(count by (userId) (count_over_time({component=\"api\"} | json | userId != \"\" [5m])))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Active Users (5m)",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 1
+							},
+							{
+								"color": "red",
+								"value": 5
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 6,
+				"x": 18,
+				"y": 0
+			},
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(rate({level=\"error\"} [1m]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Current Error Rate",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": [
+					{
+						"matcher": {
+							"id": "byName",
+							"options": "Time"
+						},
+						"properties": [
+							{
+								"id": "custom.width",
+								"value": 120
+							}
+						]
+					}
+				]
+			},
+			"gridPos": {
+				"h": 10,
+				"w": 24,
+				"x": 0,
+				"y": 6
+			},
+			"id": 5,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{component=\"api\"} | json | line_format \"{{.time}} | {{.method}} {{.path}} | {{.statusCode}} | {{.duration}}ms | {{.userId}} | {{.ip}}\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Live Request Stream",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 10,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 2,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "never",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "reqps"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 16
+			},
+			"id": 6,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(rate({component=\"api\"} [30s]))",
+					"queryType": "",
+					"refId": "A",
+					"legendFormat": "Total RPS"
+				},
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(rate({level=\"error\"} [30s]))",
+					"queryType": "",
+					"refId": "B",
+					"legendFormat": "Error Rate"
+				}
+			],
+			"title": "Real-time Request & Error Rate",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "ms"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 16
+			},
+			"id": 7,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "avg_over_time({component=\"api\"} | json | unwrap duration [30s])",
+					"queryType": "",
+					"refId": "A",
+					"legendFormat": "Avg Response Time"
+				},
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "quantile_over_time(0.95, {component=\"api\"} | json | unwrap duration [30s])",
+					"queryType": "",
+					"refId": "B",
+					"legendFormat": "P95 Response Time"
+				}
+			],
+			"title": "Real-time Response Times",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": [
+					{
+						"matcher": {
+							"id": "byName",
+							"options": "Time"
+						},
+						"properties": [
+							{
+								"id": "custom.width",
+								"value": 100
+							}
+						]
+					},
+					{
+						"matcher": {
+							"id": "byName",
+							"options": "User"
+						},
+						"properties": [
+							{
+								"id": "custom.width",
+								"value": 120
+							}
+						]
+					}
+				]
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 24,
+				"x": 0,
+				"y": 24
+			},
+			"id": 8,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{component=\"auth\"} | json | line_format \"{{.time}} | {{.event}} | {{.user.email}} | {{.ip}}\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Live Authentication Events",
+			"type": "table"
+		}
+	],
+	"refresh": "5s",
+	"schemaVersion": 39,
+	"tags": ["realtime", "operations", "live"],
+	"templating": {
+		"list": []
+	},
+	"time": {
+		"from": "now-5m",
+		"to": "now"
+	},
+	"timepicker": {},
+	"timezone": "",
+	"title": "Real-time Operations Dashboard",
+	"uid": "real-time-ops",
+	"version": 1,
+	"weekStart": ""
+}

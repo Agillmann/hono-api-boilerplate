@@ -1,0 +1,567 @@
+{
+	"annotations": {
+		"list": [
+			{
+				"builtIn": 1,
+				"datasource": {
+					"type": "grafana",
+					"uid": "-- Grafana --"
+				},
+				"enable": true,
+				"hide": true,
+				"iconColor": "rgba(0, 211, 255, 1)",
+				"name": "Annotations & Alerts",
+				"type": "dashboard"
+			}
+		]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"id": null,
+	"links": [],
+	"liveNow": false,
+	"panels": [
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 0,
+				"y": 0
+			},
+			"id": 1,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({component=\"auth\"} |~ \"login_success\" [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Successful Logins",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 5
+							},
+							{
+								"color": "red",
+								"value": 20
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 6,
+				"y": 0
+			},
+			"id": 2,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({component=\"auth\"} |~ \"login_failure\" [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Failed Logins",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "orange",
+								"value": 1
+							},
+							{
+								"color": "red",
+								"value": 5
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 12,
+				"y": 0
+			},
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({component=\"admin\"} [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Admin Actions",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 10
+							},
+							{
+								"color": "red",
+								"value": 50
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 18,
+				"y": 0
+			},
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({component=\"access\"} |~ \"401|403\" [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Unauthorized Attempts",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": [
+					{
+						"matcher": {
+							"id": "byRegexp",
+							"options": ".*success.*"
+						},
+						"properties": [
+							{
+								"id": "color",
+								"value": {
+									"mode": "fixed",
+									"fixedColor": "green"
+								}
+							}
+						]
+					},
+					{
+						"matcher": {
+							"id": "byRegexp",
+							"options": ".*failure.*"
+						},
+						"properties": [
+							{
+								"id": "color",
+								"value": {
+									"mode": "fixed",
+									"fixedColor": "red"
+								}
+							}
+						]
+					}
+				]
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 8
+			},
+			"id": 5,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum by (event) (rate({component=\"auth\"} | json [$__interval]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Authentication Events Over Time",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 8
+			},
+			"id": 6,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{component=\"admin\"} | json | line_format \"{{.time}} - {{.action}} by {{.adminUser.email}} on {{.targetResource}}\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Recent Admin Actions",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 24,
+				"x": 0,
+				"y": 16
+			},
+			"id": 7,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{component=\"auth\"} |~ \"login_failure\" | json | line_format \"{{.time}} - Failed login attempt for {{.user.email}} from {{.ip}}\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Failed Login Attempts",
+			"type": "table"
+		}
+	],
+	"refresh": "30s",
+	"schemaVersion": 39,
+	"tags": ["auth", "security"],
+	"templating": {
+		"list": []
+	},
+	"time": {
+		"from": "now-1h",
+		"to": "now"
+	},
+	"timepicker": {},
+	"timezone": "",
+	"title": "Authentication & Security Dashboard",
+	"uid": "auth-security",
+	"version": 1,
+	"weekStart": ""
+}

@@ -1,0 +1,753 @@
+{
+	"annotations": {
+		"list": [
+			{
+				"builtIn": 1,
+				"datasource": {
+					"type": "grafana",
+					"uid": "-- Grafana --"
+				},
+				"enable": true,
+				"hide": true,
+				"iconColor": "rgba(0, 211, 255, 1)",
+				"name": "Annotations & Alerts",
+				"type": "dashboard"
+			}
+		]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"id": null,
+	"links": [],
+	"liveNow": false,
+	"panels": [
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [
+						{
+							"options": {
+								"0": {
+									"color": "red",
+									"index": 1,
+									"text": "DOWN"
+								},
+								"1": {
+									"color": "green",
+									"index": 0,
+									"text": "UP"
+								}
+							},
+							"type": "value"
+						}
+					],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 0,
+				"y": 0
+			},
+			"id": 1,
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "count_over_time({component=\"system\"} |~ \"database_connected\" [5m]) > 0",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Database Connection",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 100
+							},
+							{
+								"color": "red",
+								"value": 1000
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 6,
+				"y": 0
+			},
+			"id": 2,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({component=\"api\"} | json | path=~\".*(users|organizations|teams|members).*\" [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Database Queries",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 10
+							},
+							{
+								"color": "red",
+								"value": 50
+							}
+						]
+					},
+					"unit": "short"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 12,
+				"y": 0
+			},
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum(count_over_time({component=\"error\"} |~ \"database|prisma|mysql\" [$__range]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Database Errors",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 1000
+							},
+							{
+								"color": "red",
+								"value": 5000
+							}
+						]
+					},
+					"unit": "ms"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 6,
+				"x": 18,
+				"y": 0
+			},
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "center",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["mean"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "value_and_name",
+				"wideLayout": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "avg_over_time({component=\"api\"} | json | path=~\".*(users|organizations|teams|members).*\" | unwrap duration [$__range])",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Avg Query Time",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "reqps"
+				},
+				"overrides": [
+					{
+						"matcher": {
+							"id": "byRegexp",
+							"options": ".*POST.*"
+						},
+						"properties": [
+							{
+								"id": "color",
+								"value": {
+									"mode": "fixed",
+									"fixedColor": "green"
+								}
+							}
+						]
+					},
+					{
+						"matcher": {
+							"id": "byRegexp",
+							"options": ".*GET.*"
+						},
+						"properties": [
+							{
+								"id": "color",
+								"value": {
+									"mode": "fixed",
+									"fixedColor": "blue"
+								}
+							}
+						]
+					},
+					{
+						"matcher": {
+							"id": "byRegexp",
+							"options": ".*DELETE.*"
+						},
+						"properties": [
+							{
+								"id": "color",
+								"value": {
+									"mode": "fixed",
+									"fixedColor": "red"
+								}
+							}
+						]
+					}
+				]
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 8
+			},
+			"id": 5,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum by (method) (rate({component=\"api\"} | json | path=~\".*(users|organizations|teams|members).*\" [$__interval]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Database Operations by Method",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 8
+			},
+			"id": 6,
+			"options": {
+				"legend": {
+					"displayMode": "table",
+					"placement": "right",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "donut",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "sum by (table) (\n  count_over_time(\n    {component=\"api\"} | json \n    | regexp \"(?P<table>users|organizations|teams|members|invitations)\" \n    [$__range]\n  )\n)",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Database Table Access",
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"vis": false
+						},
+						"insertNulls": false,
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					},
+					"unit": "ms"
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 16
+			},
+			"id": 7,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "avg by (path) (avg_over_time({component=\"api\"} | json | path=~\".*(users|organizations|teams|members).*\" | unwrap duration [$__interval]))",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Query Performance by Endpoint",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 12,
+				"y": 16
+			},
+			"id": 8,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{component=\"api\"} | json | duration > 2000 | path=~\".*(users|organizations|teams|members).*\" | line_format \"{{.time}} - {{.method}} {{.path}} ({{.duration}}ms)\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Slow Database Queries (>2s)",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "loki",
+				"uid": "loki-datasource"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"cellOptions": {
+							"type": "auto"
+						},
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 24,
+				"x": 0,
+				"y": 24
+			},
+			"id": 9,
+			"options": {
+				"cellHeight": "sm",
+				"footer": {
+					"countRows": false,
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pluginVersion": "10.4.0",
+			"targets": [
+				{
+					"datasource": {
+						"type": "loki",
+						"uid": "loki-datasource"
+					},
+					"editorMode": "code",
+					"expr": "{component=\"error\"} |~ \"database|prisma|mysql|connection\" | json | line_format \"{{.time}} - {{.err.message}} ({{.correlationId}})\"",
+					"queryType": "",
+					"refId": "A"
+				}
+			],
+			"title": "Recent Database Errors",
+			"type": "table"
+		}
+	],
+	"refresh": "30s",
+	"schemaVersion": 39,
+	"tags": ["database", "mysql", "prisma", "performance"],
+	"templating": {
+		"list": []
+	},
+	"time": {
+		"from": "now-1h",
+		"to": "now"
+	},
+	"timepicker": {},
+	"timezone": "",
+	"title": "Database Monitoring Dashboard",
+	"uid": "database-monitoring",
+	"version": 1,
+	"weekStart": ""
+}

@@ -1,3 +1,4 @@
+
 # 🚀 API Boilerplate with Advanced RBAC
 
 A production-ready REST API boilerplate built with **Hono** and **TypeScript**, featuring a sophisticated **Role-Based Access Control (RBAC)** system, multi-tenant organizations, and modern authentication.
@@ -250,12 +251,56 @@ bun run gen:docs         # Generate API documentation
 ```bash
 # Database only
 docker-compose up -d mysql
+
+# Database + Monitoring Stack
+docker-compose up -d mysql loki promtail grafana
+
+# View logs
 docker-compose logs mysql
+docker-compose logs grafana
+
+# Stop services
 docker-compose down
 
 # Full stack (uncomment api service in docker-compose.yml)
 docker-compose up -d
 ```
+
+### 📊 Monitoring & Observability
+
+The project includes a complete **Grafana monitoring stack** with:
+
+- **Grafana**: Web interface at http://localhost:3001 (admin/admin123)
+- **Loki**: Log aggregation and storage (30-day retention)
+- **Promtail**: Automatic log collection from `/logs/` directory
+
+#### Start Monitoring
+
+```bash
+# Start monitoring stack
+docker-compose up -d loki promtail grafana
+
+# Verify services
+docker-compose ps
+```
+
+#### Pre-built Dashboards
+
+| Dashboard | URL | Purpose |
+|-----------|-----|---------|
+| **API Performance** | http://localhost:3001/d/api-performance | Response times, request rates, status codes |
+| **Auth & Security** | http://localhost:3001/d/auth-security | Login events, admin actions, security alerts |
+| **System Health** | http://localhost:3001/d/system-health | API status, errors, database connectivity |
+| **RBAC Activity** | http://localhost:3001/d/rbac-activity | Organization operations, permissions |
+
+#### Quick Monitoring Setup
+
+1. **Ensure log generation**: Set `NODE_ENV=production` in `.env`
+2. **Start monitoring**: `docker-compose up -d loki promtail grafana`
+3. **Access Grafana**: http://localhost:3001 (admin/admin123)
+4. **View dashboards**: Pre-configured dashboards appear automatically
+
+See [**Monitoring Documentation**](./monitoring/README.md) for detailed setup and customization.
 
 ## 🧪 Testing & Debugging
 

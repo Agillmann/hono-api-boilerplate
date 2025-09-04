@@ -34,10 +34,7 @@ async function generateClients() {
 		await createClient({
 			input: inputPath,
 			output: outputDir,
-			plugins: [
-				"@hey-api/typescript",
-				"@hey-api/sdk",
-			],
+			plugins: ["@hey-api/typescript", "@hey-api/sdk"],
 		});
 
 		console.log("✅ TypeScript clients generated successfully!");
@@ -362,9 +359,12 @@ async function main() {
 		console.log("   • package.json - Package configuration");
 
 		console.log("\\n✨ Usage:");
-		console.log("   import { HealthService, SystemService } from './generated/clients'");
-		console.log("   import { UsageExample } from './generated/clients/examples'");
-
+		console.log(
+			"   import { HealthService, SystemService } from './generated/clients'",
+		);
+		console.log(
+			"   import { UsageExample } from './generated/clients/examples'",
+		);
 	} catch (error) {
 		console.error("❌ Client generation failed:", error);
 		process.exit(1);

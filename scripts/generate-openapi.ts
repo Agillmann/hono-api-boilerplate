@@ -2,10 +2,9 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import SwaggerParser from "@apidevtools/swagger-parser";
-import { createOpenAPIApp, API_INFO } from "../src/lib/openapi";
-
 // Import all routers (will be migrated progressively)
 import apiRouter from "../src/api/index.openapi";
+import { API_INFO, createOpenAPIApp } from "../src/lib/openapi";
 
 /**
  * Generate OpenAPI specification from Hono OpenAPI routes
@@ -54,7 +53,9 @@ async function generateOpenAPISpec() {
 		console.log(`   • Paths: ${paths.length}`);
 		console.log(`   • Endpoints: ${methods}`);
 		console.log(`   • Tags: ${(spec.tags || []).length}`);
-		console.log(`   • Components: ${Object.keys(spec.components?.schemas || {}).length}`);
+		console.log(
+			`   • Components: ${Object.keys(spec.components?.schemas || {}).length}`,
+		);
 
 		return spec;
 	} catch (error) {

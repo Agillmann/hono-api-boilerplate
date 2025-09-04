@@ -27,7 +27,8 @@
 			"@/docs/*": ["./src/docs/*"],
 			"@/lib/*": ["./src/lib/*"],
 			"@/services/*": ["./src/services/*"],
-			"@/prisma/*": ["prisma/*"]
+			"@/prisma/*": ["prisma/*"],
+			"@/generated/*": ["generated/*"]
 		}
 	},
 	"exclude": ["data", "dist", "tests", "node_modules"]

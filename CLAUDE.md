@@ -5,13 +5,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - `bun run dev` - Start development server with hot reload
+- `bun run build` - Build application for production
+- `bun run start` - Start production server
 - `bun run lint` - Run BiomeJS linter
 - `bun run lint:fix` - Run BiomeJS linter with auto-fix
 - `bun run db:generate` - Generate Prisma client
 - `bun run db:migrate` - Run Prisma migrations
+- `bun run db:deploy` - Deploy migrations to production database
+- `bun run db:resolve` - Resolve migration conflicts or issues
 - `bun run db:studio` - Open Prisma Studio
 - `bun run db:push` - Push schema changes to database
 - `bun run db:pull` - Pull schema from database
+- `bun run db:reset` - Reset database (⚠️ destroys all data)
 - `bun run gen:openapi` - Generate OpenAPI documentation
 
 ## Database Setup
@@ -22,11 +27,15 @@ The project uses MySQL 8.0 running in Docker. Start the database:
 docker-compose up -d mysql
 ```
 
-Database connection details:
+Database connection details (configurable via environment variables):
 - Host: localhost:3306
-- Database: api_boilerplate
-- User: app_user
-- Password: app_password
+- Database: api_boilerplate (default)
+- User: app_user (default)
+- Password: app_password (default)
+
+**Note**: The project uses Prisma migrations to set up the database schema instead of SQL initialization scripts. After starting the database, run `bun run db:migrate` to create tables.
+
+**Optional**: Uncomment the `api` service in `docker-compose.yml` to run the API server in Docker as well.
 
 ## Architecture
 
@@ -54,15 +63,16 @@ This is a Hono-based REST API with TypeScript, built around a comprehensive RBAC
   - `src/api/me.ts` - User profile and personal data routes
   - `src/api/admin.ts` - Global admin routes (user/org management)
   - `src/api/organizations.ts` - Multi-tenant organization routes
-- `src/prisma/` - Prisma schema and generated client
 - `src/services/logger.ts` - Pino logger configuration
+- `prisma/schema.prisma` - Prisma database schema
+- `prisma/generated/prisma-client/` - Generated Prisma client
 - `docs/` - Complete API documentation
 
 ### RBAC System
 The API implements a comprehensive Role-Based Access Control system:
 
 #### App-Level Roles
-- **`admin`**: System administrators with full access to `/admin/*` endpoints
+- **`admin`**: System administrators with full access to `/api/v1/admin/*` endpoints
 - **`user`**: Regular authenticated users with access to personal endpoints
 
 #### Organization Roles (Multi-tenant)
@@ -101,21 +111,34 @@ Better-Auth is configured with:
 ### Path Aliases
 The project uses TypeScript path aliases:
 - `@/*` → `./src/*`
-- `@/db/*` → `./src/db/*`
 - `@/api/*` → `./src/api/*`
 - `@/lib/*` → `./src/lib/*`
 - `@/services/*` → `./src/services/*`
-- `@/prisma/*` → `./src/prisma/*`
 
 ### Environment Variables
-Key variables defined in `src/config.ts`:
-- `DATABASE_URL` - MySQL connection string
-- `SHADOW_DATABASE_URL` - Shadow database for migrations  
-- `BETTER_AUTH_SECRET` - Authentication secret
+Key variables defined in `src/config.ts` (see `.env.example` for template):
+
+#### Better Auth Configuration
+- `BETTER_AUTH_SECRET` - Authentication secret (required)
 - `BETTER_AUTH_URL` - Base URL for Better Auth (default: http://localhost:3000)
+
+#### Database Configuration  
+- `DATABASE_URL` - MySQL connection string for main database
+- `SHADOW_DATABASE_URL` - Shadow database for Prisma migrations
+
+#### MySQL Docker Configuration (used by docker-compose.yml)
+- `MYSQL_ROOT_PASSWORD` - Root password for MySQL container
+- `MYSQL_DATABASE` - Database name to create
+- `MYSQL_USER` - Application database user  
+- `MYSQL_PASSWORD` - Application database password
+- `MYSQL_PORT` - MySQL port mapping (default: 3306)
+
+#### Application Configuration
+- `NODE_ENV` - Environment mode (development/production)
+- `APP_PORT` - Server port (default: 3000)
+
+#### Additional Configuration (if implemented)
 - `TRUSTED_ORIGINS` - Trusted origins for CORS
-- `API_PORT` - Server port (default: 3000)
-- `NODE_ENV` - Environment mode
 
 ## API Documentation
 

@@ -14,7 +14,8 @@ app.route("/api/v1", apiRouter);
 app.get("/", (c) => {
 	const apiInfo = {
 		name: "API Boilerplate",
-		description: "Hono-based REST API with comprehensive RBAC system using Better-Auth",
+		description:
+			"Hono-based REST API with comprehensive RBAC system using Better-Auth",
 		version: "1.0.0",
 		status: "running",
 		timestamp: new Date().toISOString(),
@@ -26,7 +27,12 @@ app.get("/", (c) => {
 		},
 		authentication: {
 			system: "Better-Auth",
-			features: ["Email/Password", "Admin Plugin", "Organization Plugin", "Session Management"],
+			features: [
+				"Email/Password",
+				"Admin Plugin",
+				"Organization Plugin",
+				"Session Management",
+			],
 			authUrl: "/api/v1/auth",
 		},
 		rbac: {
@@ -48,11 +54,13 @@ app.get("/", (c) => {
 					},
 					{
 						path: "GET /api/v1/system/stats",
-						description: "Public system statistics (users, organizations count)",
+						description:
+							"Public system statistics (users, organizations count)",
 					},
 					{
 						path: "GET|POST /api/v1/auth/*",
-						description: "Better-Auth endpoints (login, register, social auth, etc.)",
+						description:
+							"Better-Auth endpoints (login, register, social auth, etc.)",
 					},
 				],
 			},
@@ -96,7 +104,8 @@ app.get("/", (c) => {
 					},
 					{
 						path: "GET /api/v1/admin/users/:id",
-						description: "Get detailed user information including sessions and memberships",
+						description:
+							"Get detailed user information including sessions and memberships",
 					},
 					{
 						path: "POST /api/v1/admin/users",
@@ -124,7 +133,8 @@ app.get("/", (c) => {
 					},
 					{
 						path: "GET /api/v1/admin/organizations/:id",
-						description: "Get detailed organization info including members and teams",
+						description:
+							"Get detailed organization info including members and teams",
 					},
 					{
 						path: "POST /api/v1/admin/organizations",
@@ -150,7 +160,8 @@ app.get("/", (c) => {
 			},
 			organizations: {
 				description: "Multi-tenant organization management endpoints",
-				authentication: "Organization membership + specific permissions required",
+				authentication:
+					"Organization membership + specific permissions required",
 				routes: [
 					{
 						path: "GET /api/v1/organizations",
@@ -194,7 +205,8 @@ app.get("/", (c) => {
 					},
 					{
 						path: "DELETE /api/v1/organizations/:id/invitations/:invitationId",
-						description: "Cancel pending invitation (invitation.cancel permission)",
+						description:
+							"Cancel pending invitation (invitation.cancel permission)",
 					},
 					{
 						path: "GET /api/v1/organizations/:id/teams",

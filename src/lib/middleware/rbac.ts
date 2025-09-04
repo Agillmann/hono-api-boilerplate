@@ -1,14 +1,14 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { prisma } from "prisma/prisma-client";
 import type { RBACContext } from "../auth";
 import { auth } from "../auth";
-import { hasPermission, hasOrganizationPermission, type AppRole, type OrgRole } from "../permissions";
-
-// Permission checking interface
-interface PermissionCheck {
-	resource: string;
-	action: string;
-}
+import {
+	type AppRole,
+	hasOrganizationPermission,
+	hasPermission,
+	type OrgRole,
+} from "../permissions";
 
 /**
  * Middleware to require specific app-level permissions
@@ -27,10 +27,16 @@ export function requirePermission(
 
 		try {
 			// Get user role from database or user object
-			const userRole = (user as any).role || "user" as AppRole;
-			
+			const userRole = (user.role as AppRole) || "user";
+
 			// Check if user has the required permission
-			if (!hasPermission(userRole, resource as any, action)) {
+			if (
+				!hasPermission(
+					userRole,
+					resource as keyof typeof import("../permissions").permissions,
+					action,
+				)
+			) {
 				throw new HTTPException(403, {
 					message: `Insufficient permissions: ${resource}.${action}`,
 				});
@@ -58,7 +64,7 @@ export function requireRole(
 		}
 
 		// Check user's role (assuming role is stored in user object)
-		const userRole = (user as any).role || "user";
+		const userRole = user.role || "user";
 
 		if (!roles.includes(userRole)) {
 			throw new HTTPException(403, {
@@ -94,13 +100,18 @@ export function requireOrganizationMember(): MiddlewareHandler<{
 		}
 
 		try {
-			// Check organization membership using Better Auth's organization API
-			const membership = await auth.api.getFullOrganization({
-				body: { organizationId },
-				headers: c.req.raw.headers,
+			// Check organization membership using direct database query
+			const membership = await prisma.member.findUnique({
+				where: {
+					organizationId_userId: {
+						organizationId,
+						userId: user.id,
+					},
+				},
+				select: { role: true },
 			});
 
-			if (!membership || !membership.members?.length) {
+			if (!membership) {
 				throw new HTTPException(403, {
 					message: "Not a member of this organization",
 				});
@@ -108,7 +119,7 @@ export function requireOrganizationMember(): MiddlewareHandler<{
 
 			// Set organization context for downstream middleware
 			c.set("organizationId", organizationId);
-			c.set("organizationRole", membership.members[0]?.role || "member");
+			c.set("organizationRole", membership.role || "member");
 
 			await next();
 		} catch (error) {
@@ -146,21 +157,32 @@ export function requireOrganizationPermission(
 
 		try {
 			// Get user's organization role
-			const membership = await auth.api.getFullOrganization({
-				body: { organizationId },
-				headers: c.req.raw.headers,
+			const membership = await prisma.member.findUnique({
+				where: {
+					organizationId_userId: {
+						organizationId,
+						userId: user.id,
+					},
+				},
+				select: { role: true },
 			});
 
-			if (!membership || !membership.members?.length) {
+			if (!membership) {
 				throw new HTTPException(403, {
 					message: "Not a member of this organization",
 				});
 			}
 
-			const userOrgRole = membership.members[0]?.role || "member" as OrgRole;
-			
+			const userOrgRole = (membership.role as OrgRole) || "member";
+
 			// Check if user has the required organization permission
-			if (!hasOrganizationPermission(userOrgRole, resource as any, action)) {
+			if (
+				!hasOrganizationPermission(
+					userOrgRole,
+					resource as keyof typeof import("../permissions").organizationRolePermissions.owner,
+					action,
+				)
+			) {
 				throw new HTTPException(403, {
 					message: `Insufficient organization permissions: ${resource}.${action}`,
 				});
@@ -203,18 +225,23 @@ export function requireOrganizationRole(
 
 		try {
 			// Get organization membership details
-			const membership = await auth.api.getFullOrganization({
-				body: { organizationId },
-				headers: c.req.raw.headers,
+			const membership = await prisma.member.findUnique({
+				where: {
+					organizationId_userId: {
+						organizationId,
+						userId: user.id,
+					},
+				},
+				select: { role: true },
 			});
 
-			if (!membership || !membership.members?.length) {
+			if (!membership) {
 				throw new HTTPException(403, {
 					message: "Not a member of this organization",
 				});
 			}
 
-			const userRole = membership.members[0]?.role || "member";
+			const userRole = membership.role || "member";
 
 			if (!roles.includes(userRole)) {
 				throw new HTTPException(403, {

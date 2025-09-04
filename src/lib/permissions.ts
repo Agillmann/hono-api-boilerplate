@@ -61,7 +61,7 @@ export const organizationRolePermissions = {
 export function hasPermission(
 	role: keyof typeof rolePermissions,
 	resource: keyof typeof permissions,
-	action: string
+	action: string,
 ): boolean {
 	const rolePerms = rolePermissions[role];
 	const resourcePerms = rolePerms[resource] as readonly string[] | undefined;
@@ -71,7 +71,7 @@ export function hasPermission(
 export function hasOrganizationPermission(
 	role: keyof typeof organizationRolePermissions,
 	resource: keyof typeof organizationRolePermissions.owner,
-	action: string
+	action: string,
 ): boolean {
 	const rolePerms = organizationRolePermissions[role];
 	const resourcePerms = rolePerms[resource] as readonly string[] | undefined;

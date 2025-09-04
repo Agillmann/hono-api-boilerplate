@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import type { member, Organization } from "prisma/generated/prisma-client";
 import { prisma } from "prisma/prisma-client";
 import type { RBACContext } from "../auth";
 import { auth } from "../auth";
@@ -60,7 +61,7 @@ export async function getUserOrganizations(
 	userId: string,
 ): Promise<OrganizationMembership[]> {
 	try {
-		const memberships = await prisma.organizationMember.findMany({
+		const memberships = await prisma.member.findMany({
 			where: { userId },
 			include: {
 				organization: {
@@ -105,7 +106,7 @@ export async function isOrganizationOwnerOrAdmin(
 	organizationId: string,
 ): Promise<boolean> {
 	try {
-		const membership = await prisma.organizationMember.findUnique({
+		const membership = await prisma.member.findUnique({
 			where: {
 				organizationId_userId: {
 					organizationId,
@@ -190,9 +191,9 @@ export async function validateOrganizationAccess(
 	c: Context<{ Variables: RBACContext }>,
 	requiredRole?: string[],
 ): Promise<{
-	organization: any;
+	organization: Organization;
 	userRole: string;
-	membership: any;
+	membership: member & { organization: Organization };
 }> {
 	const user = c.get("user");
 	const organizationId = getOrganizationId(c);
@@ -205,7 +206,7 @@ export async function validateOrganizationAccess(
 		throw new Error("Organization ID required");
 	}
 
-	const membership = await prisma.organizationMember.findUnique({
+	const membership = await prisma.member.findUnique({
 		where: {
 			organizationId_userId: {
 				organizationId,

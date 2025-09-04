@@ -262,8 +262,6 @@ src/
 │   └── utils/rbac.ts          # RBAC utility functions
 ├── services/
 │   └── logger.ts              # Pino logger setup
-└── prisma/
-    └── schema.prisma          # Database schema
 
 docs/                          # Complete API documentation
 prisma/                        # Generated Prisma client  

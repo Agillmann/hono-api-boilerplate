@@ -1,8 +1,8 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { prisma } from "prisma/prisma-client";
 import { z } from "zod";
-import { prisma } from "@/prisma/prisma-client";
 import type { AuthType } from "../lib/auth";
 import { auth } from "../lib/auth";
 import { requirePermission, requireRole } from "../lib/middleware/rbac";
@@ -490,7 +490,7 @@ adminRouter.post(
 					slug: data.slug,
 					...(data.logo && { logo: data.logo }),
 				},
-				headers: new Headers(), // You might need to set proper headers
+				headers: c.req.raw.headers,
 			});
 
 			return c.json({ organization }, 201);

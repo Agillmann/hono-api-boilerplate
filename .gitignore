@@ -17,4 +17,4 @@ dist/
 mysql_data/
 
 # generated
-/src/prisma/generated/prisma-client
+/prisma/generated/prisma-client

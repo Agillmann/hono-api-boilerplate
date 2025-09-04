@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { prisma } from "@/prisma/prisma-client";
+import { prisma } from "prisma/prisma-client";
 import type { RBACContext } from "../auth";
 import { auth } from "../auth";
 

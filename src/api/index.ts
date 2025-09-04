@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { prisma } from "@/prisma/prisma-client";
+import { prisma } from "prisma/prisma-client";
 import type { AuthType } from "../lib/auth";
 import { auth } from "../lib/auth";
 import { requirePermission, requireRole } from "../lib/middleware/rbac";

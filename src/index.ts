@@ -21,7 +21,9 @@ app.get("/", (c) => {
 		timestamp: new Date().toISOString(),
 		baseUrl: "/api/v1",
 		documentation: {
-			quickReference: "/docs/endpoints-quick-reference.md",
+			quickReference: "/docs/",
+			betterAuthReference: "/api/v1/auth/api/auth/reference",
+			endpointsQuickReference: "/docs/endpoints-quick-reference.md",
 			completeApiDocs: "/docs/api-endpoints.md",
 			architecture: "/docs/README.md",
 		},

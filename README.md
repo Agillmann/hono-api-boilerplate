@@ -1,36 +1,58 @@
-# API Boilerplate with RBAC
+# 🚀 API Boilerplate with Advanced RBAC
 
-A sophisticated REST API boilerplate built with **Hono** and **TypeScript**, featuring a comprehensive **Role-Based Access Control (RBAC)** system with multi-tenant organizations, team management, and advanced authentication.
+A production-ready REST API boilerplate built with **Hono** and **TypeScript**, featuring a sophisticated **Role-Based Access Control (RBAC)** system, multi-tenant organizations, and modern authentication.
 
-## ⚡ Core Features
+## ⚡ Why This Boilerplate?
 
-- **🔐 Advanced RBAC System**: Multi-level permissions (App-level + Organization-level roles)
-- **🏢 Multi-tenant Organizations**: Complete organization management with teams and invitations
-- **🔑 Better-Auth Integration**: Session-based authentication with admin and organization plugins
-- **⚡ High Performance**: Built on Hono framework with Bun runtime
-- **📊 MySQL + Prisma**: Robust database with type-safe ORM
-- **📝 Comprehensive Documentation**: Complete API docs with OpenAPI specification
-- **🧪 Production Ready**: Full validation, logging, and error handling
+- **🔐 Enterprise RBAC**: Multi-level permissions (App + Organization roles) with granular access control
+- **🏢 Multi-Tenant Ready**: Complete organization management with teams, invitations, and member roles
+- **⚡ High Performance**: Built on Hono framework with Bun runtime for maximum speed
+- **🔑 Modern Auth**: Better-Auth integration with session-based security
+- **📊 Production Database**: MySQL 8.0 + Prisma ORM with type safety
+- **🧪 Developer Experience**: Hot reload, comprehensive logging, auto-generated docs
+- **📝 Complete Documentation**: Detailed API docs with OpenAPI specification
+
+## 🛠️ Tech Stack
+
+| Component | Technology | Version |
+|-----------|------------|---------|
+| **Runtime** | [Bun](https://bun.sh) | Latest |
+| **Framework** | [Hono](https://hono.dev) | ^4.9.6 |
+| **Authentication** | [Better-Auth](https://www.better-auth.com) | ^1.3.7 |
+| **Database** | [MySQL](https://mysql.com) + [Prisma](https://prisma.io) | 8.0 + ^6.15.0 |
+| **Validation** | [Zod](https://zod.dev) | ^4.0 |
+| **Logging** | [Pino](https://getpino.io) | ^9.9.1 |
+| **Code Quality** | [BiomeJS](https://biomejs.dev) | ^2.2.2 |
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### Prerequisites
+
+- **Bun** runtime installed ([Install Guide](https://bun.sh/docs/installation))
+- **Docker** for database (or local MySQL 8.0)
+- **Git** for cloning
+
+### 1. Setup Project
 
 ```bash
+# Clone and install dependencies
+git clone <repository-url>
+cd api-boilerplate
 bun install
 ```
 
-### 2. Set Up Environment
+### 2. Configure Environment
 
 ```bash
+# Copy environment template
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration:
+**Essential environment variables:**
 
 ```env
 # Better Auth Configuration
-BETTER_AUTH_SECRET=your-super-secret-key-here
+BETTER_AUTH_SECRET=your-super-secret-key-here-min-32-chars
 BETTER_AUTH_URL=http://localhost:3000
 
 # Database Configuration  
@@ -40,249 +62,309 @@ SHADOW_DATABASE_URL=mysql://app_user:app_password@localhost:3306/api_boilerplate
 # Application
 NODE_ENV=development
 APP_PORT=3000
-
-# Docker MySQL Settings (if using Docker)
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=api_boilerplate
-MYSQL_USER=app_user
-MYSQL_PASSWORD=app_password
-MYSQL_PORT=3306
 ```
 
 ### 3. Start Database
 
 ```bash
-# Using Docker (recommended)
+# Start MySQL with Docker (recommended)
 docker-compose up -d mysql
 
-# Wait for database to be ready
+# Verify database is ready
 docker-compose ps
 ```
 
-### 4. Set Up Database Schema
+### 4. Initialize Database
 
 ```bash
-# Generate Prisma client
+# Generate Prisma client and run migrations
 bun run db:generate
-
-# Run migrations to create tables
 bun run db:migrate
 ```
 
-### 5. Start Development Server
+### 5. Start Development
 
 ```bash
+# Start with hot reload
 bun run dev
+# ✅ API running at http://localhost:3000/api/v1
 ```
 
-The API will be available at `http://localhost:3000/api/v1`
+### 🎯 Test Your Setup
 
-## 🏗️ Architecture Overview
+```bash
+# Test public endpoints
+curl http://localhost:3000/api/v1/health/api
+curl http://localhost:3000/api/v1/system/stats
 
-### Tech Stack
+# Test protected endpoint (expect 401)
+curl http://localhost:3000/api/v1/me
+```
 
-- **Runtime**: [Bun](https://bun.sh) - Fast JavaScript runtime
-- **Framework**: [Hono](https://hono.dev) - Ultrafast web framework  
-- **Authentication**: [Better-Auth](https://www.better-auth.com) - Modern auth library
-- **Database**: [MySQL 8.0](https://mysql.com) + [Prisma ORM](https://prisma.io)
-- **Validation**: [Zod](https://zod.dev) - TypeScript-first schema validation
-- **Logging**: [Pino](https://getpino.io) - Fast JSON logger
-- **Linting**: [BiomeJS](https://biomejs.dev) - Fast linter and formatter
+## 🔐 Authentication & RBAC System
 
-### RBAC System
+### Authentication Flow
 
-#### App-Level Roles
-- **`admin`**: System administrators with global access to `/api/v1/admin/*`
-- **`user`**: Authenticated users with access to personal endpoints
+The API uses **Better-Auth** with session-based authentication:
 
-#### Organization-Level Roles  
-- **`owner`**: Full control over organization (delete, manage all members)
-- **`admin`**: Manage organization members, teams, and settings
-- **`member`**: Basic access to organization resources
+1. **Register/Login** → Get session cookie
+2. **Session Management** → Automatic cookie handling  
+3. **Role Assignment** → App-level roles (`admin`/`user`)
+4. **Organization Access** → Join orgs with specific roles
+5. **Permission Validation** → Middleware checks for each endpoint
 
-#### Permission Model
+### RBAC Hierarchy
+
+```
+🎯 App-Level Roles
+├── admin → System administrator (global access to /admin/*)
+└── user  → Authenticated user (access to /me/* + organization features)
+
+🏢 Organization-Level Roles  
+├── owner  → Full control (delete org, manage all)
+├── admin  → Manage members, teams, settings
+└── member → Basic access to organization resources
+```
+
+### Permission Model
+
 Permissions are structured around **resources** and **actions**:
 
 - **Resources**: `user`, `organization`, `team`, `invitation`, `member`
 - **Actions**: `create`, `read`, `update`, `delete`, `manage`, `invite`, `ban`
 
-## 🔑 Authentication Flow
+**Example Permission Checks:**
+```typescript
+// Organization admin can invite members
+user.hasPermission('invitation.create', organizationId)
 
-The API uses Better-Auth with session-based authentication:
+// Only owners can delete organizations  
+user.hasRole('owner', organizationId)
 
-1. **Registration/Login**: POST to `/api/v1/auth/sign-up` or `/api/v1/auth/sign-in`
-2. **Session Management**: Automatic session handling via cookies
-3. **Role Assignment**: Users get app-level roles (`admin`/`user`)
-4. **Organization Access**: Users join organizations with specific roles
-5. **Permission Checking**: Middleware validates permissions for each endpoint
-
-### Available Auth Endpoints
-
-- `/api/v1/auth/sign-up` - User registration
-- `/api/v1/auth/sign-in` - User login  
-- `/api/v1/auth/sign-out` - User logout
-- `/api/v1/auth/session` - Get current session
-- `/api/v1/auth/reference` - OpenAPI documentation
-
-## 📚 API Endpoints
-
-### Public Endpoints (No Authentication)
-- `GET /api/v1/health/*` - System health checks
-- `GET /api/v1/system/stats` - Public system statistics  
-- `POST /api/v1/auth/*` - Authentication endpoints
-
-### User Endpoints (Authentication Required)
-- `GET /api/v1/me` - User profile
-- `GET /api/v1/me/organizations` - User's organizations
-- `GET /api/v1/me/invitations` - Pending invitations
-
-### Admin Endpoints (Admin Role Required)
-- `GET /api/v1/admin/users` - Manage all users
-- `GET /api/v1/admin/organizations` - Manage all organizations
-- `POST /api/v1/admin/users/:id/ban` - Ban/unban users
-
-### Organization Endpoints (Organization Membership + Permissions)
-- `POST /api/v1/organizations` - Create organization
-- `GET /api/v1/organizations/:slug` - Organization details  
-- `POST /api/v1/organizations/:slug/invite` - Invite members
-- `GET /api/v1/organizations/:slug/teams` - Manage teams
-
-## 🧪 Testing the API
-
-### Quick Test Commands
-
-```bash
-# Test public endpoint
-curl http://localhost:3000/api/v1/health/api
-
-# Test system stats
-curl http://localhost:3000/api/v1/system/stats
-
-# Test protected endpoint (will return 401 without authentication)
-curl http://localhost:3000/api/v1/me
-
-# Test admin endpoint (will return 403 without admin role)
-curl http://localhost:3000/api/v1/admin/users
+// System admins bypass organization permissions
+user.hasSystemRole('admin')
 ```
 
-### Authentication Testing
+## 📚 API Overview
 
-1. **Register a new user**:
+### Endpoint Categories
+
+| Category | Base Path | Authentication | Description |
+|----------|-----------|----------------|-------------|
+| **System** | `/api/v1/health/*` | Public | Health checks, system stats |
+| **Auth** | `/api/v1/auth/*` | Public | Better-Auth endpoints (auto-generated) |
+| **User** | `/api/v1/me/*` | Session Required | User profile, organizations, invitations |
+| **Organizations** | `/api/v1/organizations/*` | Session + Membership | Multi-tenant org management |
+| **Admin** | `/api/v1/admin/*` | Admin Role Required | System administration |
+
+### Essential API Examples
+
+#### User Registration & Login
+
 ```bash
+# Register new user
 curl -X POST http://localhost:3000/api/v1/auth/sign-up \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
-```
+  -d '{"email":"dev@example.com","password":"password123","name":"Developer"}'
 
-2. **Login and get session**:
-```bash
+# Login (get session cookie)
 curl -X POST http://localhost:3000/api/v1/auth/sign-in \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
+  -c cookies.txt \
+  -d '{"email":"dev@example.com","password":"password123"}'
+```
+
+#### User Profile & Organizations
+
+```bash
+# Get my profile (with session)
+curl http://localhost:3000/api/v1/me \
+  -b cookies.txt
+
+# Get my organizations
+curl http://localhost:3000/api/v1/me/organizations \
+  -b cookies.txt
+```
+
+#### Organization Management
+
+```bash
+# Create organization
+curl -X POST http://localhost:3000/api/v1/organizations \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"name":"My Company","slug":"my-company"}'
+
+# Invite member to organization  
+curl -X POST http://localhost:3000/api/v1/organizations/{id}/invite \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"email":"member@example.com","role":"admin"}'
+```
+
+#### Admin Operations (Admin Role Required)
+
+```bash
+# List all users with pagination
+curl http://localhost:3000/api/v1/admin/users?page=1&limit=10 \
+  -b cookies.txt
+
+# Ban a user
+curl -X POST http://localhost:3000/api/v1/admin/users/{id}/ban \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"reason":"Policy violation","expiresAt":"2024-12-31T23:59:59Z"}'
+```
+
+## 🛠️ Development Commands
+
+### Core Development
+
+```bash
+bun run dev              # Start with hot reload
+bun run build            # Build for production  
+bun run start            # Start production server
+```
+
+### Database Management
+
+```bash
+bun run db:generate      # Generate Prisma client
+bun run db:migrate       # Create and run migrations
+bun run db:studio        # Open Prisma Studio (DB GUI)
+bun run db:push          # Push schema changes
+bun run db:reset         # Reset database (⚠️ destroys data)
+```
+
+### Code Quality & Documentation
+
+```bash
+bun run lint             # Run BiomeJS linter
+bun run lint:fix         # Auto-fix linting issues
+bun run gen:openapi      # Generate OpenAPI spec
+bun run gen:docs         # Generate API documentation
+```
+
+### Docker Operations
+
+```bash
+# Database only
+docker-compose up -d mysql
+docker-compose logs mysql
+docker-compose down
+
+# Full stack (uncomment api service in docker-compose.yml)
+docker-compose up -d
+```
+
+## 🧪 Testing & Debugging
+
+### Development Logging
+
+The API includes comprehensive logging with **Pino**:
+
+- **Console**: Pretty-formatted logs in development
+- **Files**: Structured JSON logs in production
+- **Categories**: Access, errors, auth events, admin actions, system events
+
+```bash
+# View recent errors
+tail -f logs/error.log
+
+# Monitor API access
+tail -f logs/access.log
+
+# Watch auth events
+tail -f logs/auth.log
+```
+
+### Common Debugging
+
+```bash
+# Check API health
+curl http://localhost:3000/api/v1/health/api
+
+# Verify database connection
+curl http://localhost:3000/api/v1/health/db
+
+# Test authentication (should return 401 without session)
+curl http://localhost:3000/api/v1/me
+
+# Check your permissions
+curl http://localhost:3000/api/v1/system/permissions -b cookies.txt
 ```
 
 ## 📖 Complete Documentation
 
-Comprehensive API documentation is available in the `/docs` directory:
+| Document | Description | Use Case |
+|----------|-------------|----------|
+| **[📋 Quick Reference](./docs/endpoints-quick-reference.md)** | Concise endpoint tables by role | Fast API lookup during development |
+| **[📚 Complete API Docs](./docs/api-endpoints.md)** | Detailed endpoint docs with schemas | Integration development |
+| **[📝 Logging Guide](./docs/logging.md)** | Logging system & monitoring setup | Production debugging & monitoring |
+| **[🗺️ Documentation Index](./docs/README.md)** | Navigation & architecture overview | Understanding system design |
 
-- **[📋 Quick Reference](./docs/endpoints-quick-reference.md)** - Concise endpoint tables by role
-- **[📚 Complete API Docs](./docs/api-endpoints.md)** - Detailed docs with examples and schemas  
-- **[🗺️ Documentation Guide](./docs/README.md)** - Navigation and architecture overview
-
-## ⚙️ Development Commands
-
-```bash
-# Development
-bun run dev              # Start dev server with hot reload
-bun run build            # Build for production  
-bun run start            # Start production server
-
-# Database Management
-bun run db:generate      # Generate Prisma client
-bun run db:migrate       # Run database migrations
-bun run db:deploy        # Deploy migrations (production)
-bun run db:studio        # Open Prisma Studio
-bun run db:push          # Push schema to database
-bun run db:pull          # Pull schema from database
-bun run db:reset         # Reset database (⚠️ destroys data)
-
-# Code Quality
-bun run lint             # Run BiomeJS linter
-bun run lint:fix         # Auto-fix linting issues
-
-# Documentation
-bun run gen:openapi      # Generate OpenAPI documentation
-```
-
-## 🐳 Docker Setup
-
-### Start MySQL Only
+### Auto-Generated Documentation
 
 ```bash
-docker-compose up -d mysql
-```
-
-### Optional: Run API in Docker
-
-Uncomment the `api` service in `docker-compose.yml` and run:
-
-```bash
-docker-compose up -d
-```
-
-### Docker Management
-
-```bash
-# View logs
-docker-compose logs mysql
-
-# Stop services  
-docker-compose down
-
-# Stop and remove data (⚠️ destructive)
-docker-compose down -v
+# Generate and view OpenAPI docs
+bun run gen:openapi
+# Visit: http://localhost:3000/api/v1/auth/reference
 ```
 
 ## 🗂️ Project Structure
 
 ```
 src/
-├── index.ts                    # Application entry point
+├── index.ts                    # Application entry point + main router
 ├── config.ts                   # Environment configuration
 ├── api/                        # API route handlers
-│   ├── index.ts               # Main router + system endpoints
-│   ├── auth.ts                # Better-Auth routes
+│   ├── auth.ts                # Better-Auth integration
 │   ├── me.ts                  # User profile routes  
 │   ├── admin.ts               # Admin management routes
-│   └── organizations.ts       # Organization routes
+│   └── organizations.ts       # Organization & team routes
 ├── lib/                       # Core libraries
 │   ├── auth.ts                # Better-Auth configuration
 │   ├── permissions.ts         # RBAC permission definitions
 │   ├── middleware/rbac.ts     # RBAC middleware
 │   └── utils/rbac.ts          # RBAC utility functions
-├── services/
-│   └── logger.ts              # Pino logger setup
+└── services/
+    └── logger.ts              # Pino logger configuration
 
 docs/                          # Complete API documentation
-prisma/                        # Generated Prisma client  
-docker-compose.yml            # Docker services
+prisma/                        # Database schema & migrations
+logs/                          # Application logs (created at runtime)
 ```
 
-## 🚨 Important Security Notes
+## 🚨 Production Considerations
 
-- **Change default passwords** in production environments
-- **Use strong secrets** for `BETTER_AUTH_SECRET`
-- **Configure CORS** properly for production
-- **Enable SSL/HTTPS** in production
-- **Review permission model** before deploying
+### Security Checklist
+
+- [ ] **Strong secrets**: Use 32+ character `BETTER_AUTH_SECRET`
+- [ ] **Database security**: Change default MySQL passwords
+- [ ] **CORS configuration**: Set proper origins for production
+- [ ] **HTTPS**: Enable SSL/TLS in production
+- [ ] **Rate limiting**: Implement request throttling
+- [ ] **Log rotation**: Set up log management
+
+### Performance & Monitoring
+
+- **Logging**: All requests logged with correlation IDs
+- **Health endpoints**: Monitor API and database status
+- **Metrics**: Ready for Grafana/monitoring integration
+- **Database**: Optimized Prisma queries with proper indexing
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Follow the existing code style (BiomeJS configuration)
-4. Submit a pull request
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Follow** code style: Run `bun run lint:fix`
+4. **Test** your changes thoroughly
+5. **Submit** a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License** - see the LICENSE file for details.
+
+---
+
+**🚀 Ready to build?** Start with the [Quick Start](#-quick-start) guide above, then explore the [complete documentation](./docs/) for advanced features and deployment strategies.

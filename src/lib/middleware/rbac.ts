@@ -12,6 +12,22 @@ import {
 } from "../permissions";
 
 /**
+ * Middleware to require authentication (user and session)
+ */
+export function requireAuth(): MiddlewareHandler<{ Variables: RBACContext }> {
+	return async (c, next) => {
+		const user = c.get("user");
+		const session = c.get("session");
+
+		if (!user || !session) {
+			throw new HTTPException(401, { message: "Authentication required" });
+		}
+
+		await next();
+	};
+}
+
+/**
  * Middleware to require specific app-level permissions
  */
 export function requirePermission(

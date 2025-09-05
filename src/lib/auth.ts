@@ -8,7 +8,7 @@ import {
 } from "better-auth/plugins";
 import type { Context } from "hono";
 import { prisma } from "prisma/prisma-client";
-import { config } from "@/config";
+import { config } from "@/config/environment";
 
 export const auth = betterAuth({
 	database: prismaAdapter(prisma, {

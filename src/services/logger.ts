@@ -1,5 +1,5 @@
 import pino, { type LoggerOptions } from "pino";
-import { config } from "../config";
+import { config } from "../config/environment";
 
 // Log levels for different types of operations
 export const LOG_LEVELS = {

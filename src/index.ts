@@ -1,7 +1,7 @@
 import bun from "bun";
 import { Hono } from "hono";
 import apiRouter from "@/api";
-import { config } from "@/config";
+import { config } from "@/config/environment";
 import {
 	errorLoggingMiddleware,
 	healthCheckLoggingMiddleware,

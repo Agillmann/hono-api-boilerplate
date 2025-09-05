@@ -3,11 +3,15 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
 import { z } from "zod/v4";
-import type { AuthType } from "../lib/auth";
-import { getUserOrganizations, getUserWithRole } from "../lib/utils/rbac";
-import { logError } from "../services/logger";
+import type { AuthType } from "@/lib/auth";
+import { requireAuth } from "@/lib/middleware/rbac";
+import { getUserOrganizations, getUserWithRole } from "@/lib/utils/rbac";
+import { logError } from "@/services/logger";
 
 const meRouter = new Hono<{ Variables: AuthType }>();
+
+// Apply authentication middleware to all routes
+meRouter.use("*", requireAuth());
 
 // Validation schemas
 const updateProfileSchema = z.object({
@@ -22,45 +26,37 @@ meRouter.get("/", async (c) => {
 	const user = c.get("user");
 	const session = c.get("session");
 
-	if (!user || !session) {
-		throw new HTTPException(401, { message: "Authentication required" });
-	}
-
 	try {
 		// Get full user details with role information
-		const userWithRole = await getUserWithRole(user.id);
+		const userWithRole = await getUserWithRole(user!.id);
 
 		return c.json({
 			user: userWithRole,
 			session: {
-				id: session.id,
-				createdAt: session.createdAt,
-				updatedAt: session.updatedAt,
+				id: session?.id,
+				createdAt: session?.createdAt,
+				updatedAt: session?.updatedAt,
 			},
 		});
 	} catch (error) {
 		logError(error as Error, {
 			operation: "fetch_user_profile",
-			userId: user.id,
+			userId: user?.id,
 		});
 		throw new HTTPException(500, { message: "Failed to fetch user profile" });
 	}
 });
 
 /**
- * PUT /me - Update current user profile
+ * PATCH /me - Update current user profile
  */
-meRouter.put("/", zValidator("json", updateProfileSchema), async (c) => {
+meRouter.patch("/", zValidator("json", updateProfileSchema), async (c) => {
 	const user = c.get("user");
 	const data = c.req.valid("json");
 
-	if (!user) {
-		throw new HTTPException(401, { message: "Authentication required" });
-	}
-
 	try {
 		const updatedUser = await prisma.user.update({
-			where: { id: user.id },
+			where: { id: user!.id },
 			data: {
 				...(data.name && { name: data.name }),
 				...(data.email && { email: data.email }),
@@ -80,7 +76,7 @@ meRouter.put("/", zValidator("json", updateProfileSchema), async (c) => {
 	} catch (error) {
 		logError(error as Error, {
 			operation: "update_user_profile",
-			userId: user.id,
+			userId: user?.id,
 			updateData: data,
 		});
 		throw new HTTPException(500, { message: "Failed to update user profile" });
@@ -93,17 +89,13 @@ meRouter.put("/", zValidator("json", updateProfileSchema), async (c) => {
 meRouter.get("/organizations", async (c) => {
 	const user = c.get("user");
 
-	if (!user) {
-		throw new HTTPException(401, { message: "Authentication required" });
-	}
-
 	try {
-		const organizations = await getUserOrganizations(user.id);
+		const organizations = await getUserOrganizations(user!.id);
 		return c.json({ organizations });
 	} catch (error) {
 		logError(error as Error, {
 			operation: "fetch_user_organizations",
-			userId: user.id,
+			userId: user?.id,
 		});
 		throw new HTTPException(500, {
 			message: "Failed to fetch user organizations",
@@ -117,13 +109,9 @@ meRouter.get("/organizations", async (c) => {
 meRouter.get("/teams", async (c) => {
 	const user = c.get("user");
 
-	if (!user) {
-		throw new HTTPException(401, { message: "Authentication required" });
-	}
-
 	try {
 		const teamMemberships = await prisma.teamMember.findMany({
-			where: { userId: user.id },
+			where: { userId: user!.id },
 			include: {
 				team: {
 					include: {
@@ -148,7 +136,7 @@ meRouter.get("/teams", async (c) => {
 	} catch (error) {
 		logError(error as Error, {
 			operation: "fetch_user_teams",
-			userId: user.id,
+			userId: user?.id,
 		});
 		throw new HTTPException(500, { message: "Failed to fetch user teams" });
 	}
@@ -160,14 +148,10 @@ meRouter.get("/teams", async (c) => {
 meRouter.get("/invitations", async (c) => {
 	const user = c.get("user");
 
-	if (!user) {
-		throw new HTTPException(401, { message: "Authentication required" });
-	}
-
 	try {
 		const invitations = await prisma.invitation.findMany({
 			where: {
-				email: user.email,
+				email: user!.email,
 			},
 			include: {
 				organization: {
@@ -193,7 +177,7 @@ meRouter.get("/invitations", async (c) => {
 	} catch (error) {
 		logError(error as Error, {
 			operation: "fetch_user_invitations",
-			userId: user.id,
+			userId: user?.id,
 		});
 		throw new HTTPException(500, {
 			message: "Failed to fetch user invitations",
@@ -201,4 +185,90 @@ meRouter.get("/invitations", async (c) => {
 	}
 });
 
+/**
+ * POST /me/invitations/:invitationId/accept - Accept organization invitation
+ */
+meRouter.post("/invitations/:invitationId/accept", async (c) => {
+	const user = c.get("user");
+	const invitationId = c.req.param("invitationId");
+
+	try {
+		const invitation = await prisma.invitation.findFirst({
+			where: {
+				id: invitationId,
+				email: user!.email,
+			},
+			include: {
+				organization: true,
+			},
+		});
+
+		if (!invitation) {
+			throw new HTTPException(404, { message: "Invitation not found" });
+		}
+
+		if (new Date() > invitation.expiresAt) {
+			throw new HTTPException(400, { message: "Invitation expired" });
+		}
+
+		// Accept invitation by creating membership and deleting invitation
+		await prisma.$transaction([
+			prisma.member.create({
+				data: {
+					organizationId: invitation.organizationId,
+					userId: user!.id,
+					role: invitation.role,
+				},
+			}),
+			prisma.invitation.delete({
+				where: { id: invitationId },
+			}),
+		]);
+
+		return c.json({ message: "Invitation accepted successfully" });
+	} catch (error) {
+		logError(error as Error, {
+			operation: "accept_invitation",
+			userId: user?.id,
+			invitationId,
+		});
+		throw new HTTPException(500, { message: "Failed to accept invitation" });
+	}
+});
+
+/**
+ * POST /me/invitations/:invitationId/reject - Reject organization invitation
+ */
+meRouter.post("/invitations/:invitationId/reject", async (c) => {
+	const user = c.get("user");
+	const invitationId = c.req.param("invitationId");
+
+	try {
+		const invitation = await prisma.invitation.findFirst({
+			where: {
+				id: invitationId,
+				email: user!.email,
+			},
+		});
+
+		if (!invitation) {
+			throw new HTTPException(404, { message: "Invitation not found" });
+		}
+
+		await prisma.invitation.delete({
+			where: { id: invitationId },
+		});
+
+		return c.json({ message: "Invitation rejected successfully" });
+	} catch (error) {
+		logError(error as Error, {
+			operation: "reject_invitation",
+			userId: user?.id,
+			invitationId,
+		});
+		throw new HTTPException(500, { message: "Failed to reject invitation" });
+	}
+});
+
+export type AppType = typeof meRouter;
 export default meRouter;

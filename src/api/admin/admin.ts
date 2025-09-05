@@ -4,11 +4,11 @@ import { HTTPException } from "hono/http-exception";
 import type { Prisma } from "prisma/generated/prisma-client";
 import { prisma } from "prisma/prisma-client";
 import { z } from "zod/v4";
-import type { AuthType } from "../lib/auth";
-import { auth } from "../lib/auth";
-import { requireRole } from "../lib/middleware/rbac";
-import { getUserWithRole } from "../lib/utils/rbac";
-import { logAdminAction, logError } from "../services/logger";
+import type { AuthType } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { requireRole } from "@/lib/middleware/rbac";
+import { getUserWithRole } from "@/lib/utils/rbac";
+import { logAdminAction, logError } from "@/services/logger";
 
 const adminRouter = new Hono<{ Variables: AuthType }>();
 
@@ -231,9 +231,9 @@ adminRouter.post("/users", zValidator("json", createUserSchema), async (c) => {
 });
 
 /**
- * PUT /admin/users/:id - Update user
+ * PATCH /admin/users/:id - Update user
  */
-adminRouter.put(
+adminRouter.patch(
 	"/users/:id",
 	zValidator("json", updateUserSchema),
 	async (c) => {
@@ -707,4 +707,5 @@ adminRouter.get("/stats", async (c) => {
 	}
 });
 
+export type AppType = typeof adminRouter;
 export default adminRouter;

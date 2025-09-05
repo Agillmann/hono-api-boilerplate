@@ -1,0 +1,136 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "API Boilerplate",
+		"version": "1.0.0",
+		"description": "# Hono-based REST API with Comprehensive RBAC System\n\nA sophisticated REST API boilerplate built with Hono and TypeScript, featuring:\n\n- **Authentication**: Better-Auth with email/password, admin and organization plugins\n- **Authorization**: Role-Based Access Control (RBAC) with granular permissions\n- **Multi-tenancy**: Organization-based access control with roles and teams\n- **Type Safety**: Full TypeScript support with Zod validation\n- **Documentation**: Auto-generated OpenAPI 3.0 specification\n\n## Authentication\n\nThe API uses Better-Auth for authentication with session-based access control.\n\n### App-Level Roles\n- **admin**: System administrators with full access\n- **user**: Regular authenticated users\n\n### Organization Roles\n- **owner**: Full organization control\n- **admin**: Manage members and settings\n- **member**: Basic organization access\n\n## Quick Start\n\n1. **Authentication**: Use `POST /auth/sign-in` to authenticate\n2. **Session**: Session cookie is automatically set on successful login\n3. **Access**: Use authenticated endpoints with session cookie\n4. **RBAC**: Permissions are checked based on user role and organization membership",
+		"contact": {
+			"name": "API Support",
+			"url": "https://github.com/agillmann/api-boilerplate"
+		},
+		"license": {
+			"name": "MIT",
+			"url": "https://opensource.org/licenses/MIT"
+		}
+	},
+	"servers": [
+		{
+			"url": "http://localhost:3000/api/v1",
+			"description": "Development server"
+		},
+		{
+			"url": "https://api.yourdomain.com/v1",
+			"description": "Production server"
+		}
+	],
+	"tags": [
+		{
+			"name": "Health",
+			"description": "Health check and system status endpoints"
+		},
+		{ "name": "System", "description": "System information and statistics" },
+		{
+			"name": "Authentication",
+			"description": "Better-Auth managed authentication endpoints"
+		},
+		{
+			"name": "User Profile",
+			"description": "Current user profile and personal data management"
+		},
+		{
+			"name": "Administration",
+			"description": "Global admin endpoints (admin role required)"
+		},
+		{
+			"name": "Organizations",
+			"description": "Multi-tenant organization management"
+		},
+		{ "name": "Teams", "description": "Team management within organizations" },
+		{
+			"name": "Invitations",
+			"description": "Organization invitation management"
+		}
+	],
+	"components": {
+		"schemas": {
+			"Health": {
+				"type": "object",
+				"properties": {
+					"status": { "type": "string", "example": "API is running" }
+				},
+				"required": ["status"]
+			},
+			"Error": {
+				"type": "object",
+				"properties": {
+					"error": { "type": "string", "example": "Not found" },
+					"details": { "type": "string", "example": "User not found" }
+				},
+				"required": ["error"]
+			},
+			"DatabaseHealth": {
+				"type": "object",
+				"properties": {
+					"status": {
+						"type": "string",
+						"example": "Database connected successfully"
+					}
+				},
+				"required": ["status"]
+			}
+		}
+	},
+	"paths": {
+		"/health/api": {
+			"get": {
+				"tags": ["Health"],
+				"summary": "API Health Check",
+				"description": "Check if the API is running and responding",
+				"responses": {
+					"200": {
+						"description": "API is running",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/Health" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/health/db": {
+			"get": {
+				"tags": ["Health"],
+				"summary": "Database Health Check",
+				"description": "Check database connectivity",
+				"responses": {
+					"200": {
+						"description": "Database is connected",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/DatabaseHealth" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/health/better-auth": {
+			"get": {
+				"tags": ["Health"],
+				"summary": "Better-Auth Health Check",
+				"description": "Check Better-Auth connectivity and status",
+				"responses": {
+					"200": {
+						"description": "Better-Auth is connected",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/Health" }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

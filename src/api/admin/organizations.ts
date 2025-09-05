@@ -3,18 +3,19 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
 import { z } from "zod/v4";
-import type { RBACContext } from "../lib/auth";
-import { auth } from "../lib/auth";
+import type { RBACContext } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import {
+	requireAuth,
 	requireOrganizationMember,
 	requireOrganizationPermission,
 	requireOrganizationRole,
-} from "../lib/middleware/rbac";
+} from "@/lib/middleware/rbac";
 import {
 	getOrganizationWithUserRole,
 	getUserAccessibleOrganizations,
-} from "../lib/utils/rbac";
-import { logError } from "../services/logger";
+} from "@/lib/utils/rbac";
+import { logError } from "@/services/logger";
 
 const organizationRouter = new Hono<{ Variables: RBACContext }>();
 
@@ -50,21 +51,17 @@ const createTeamSchema = z.object({
 /**
  * GET /organizations - Get user's organizations
  */
-organizationRouter.get("/", async (c) => {
+organizationRouter.get("/", requireAuth(), async (c) => {
 	const user = c.get("user");
 
-	if (!user) {
-		throw new HTTPException(401, { message: "Authentication required" });
-	}
-
 	try {
-		const organizations = await getUserAccessibleOrganizations(user.id);
+		const organizations = await getUserAccessibleOrganizations(user!.id);
 
 		return c.json({ organizations });
 	} catch (error) {
 		logError(error as Error, {
 			operation: "fetch_user_organizations",
-			userId: user.id,
+			userId: user?.id,
 		});
 		throw new HTTPException(500, { message: "Failed to fetch organizations" });
 	}
@@ -75,14 +72,11 @@ organizationRouter.get("/", async (c) => {
  */
 organizationRouter.post(
 	"/",
+	requireAuth(),
 	zValidator("json", createOrganizationSchema),
 	async (c) => {
 		const user = c.get("user");
 		const data = c.req.valid("json");
-
-		if (!user) {
-			throw new HTTPException(401, { message: "Authentication required" });
-		}
 
 		try {
 			// Check if slug is unique
@@ -110,7 +104,7 @@ organizationRouter.post(
 		} catch (error) {
 			logError(error as Error, {
 				operation: "create_organization",
-				userId: user.id,
+				userId: user?.id,
 				organizationData: { name: data.name, slug: data.slug },
 			});
 			throw new HTTPException(500, {
@@ -130,14 +124,10 @@ organizationRouter.get(
 		const user = c.get("user");
 		const organizationId = c.req.param("organizationId");
 
-		if (!user) {
-			throw new HTTPException(401, { message: "Authentication required" });
-		}
-
 		try {
 			const organization = await getOrganizationWithUserRole(
 				organizationId,
-				user.id,
+				user!.id,
 			);
 
 			if (!organization) {
@@ -148,7 +138,7 @@ organizationRouter.get(
 		} catch (error) {
 			logError(error as Error, {
 				operation: "fetch_organization_details",
-				userId: user.id,
+				userId: user?.id,
 				organizationId,
 			});
 			throw new HTTPException(500, { message: "Failed to fetch organization" });
@@ -157,9 +147,9 @@ organizationRouter.get(
 );
 
 /**
- * PUT /organizations/:organizationId - Update organization
+ * PATCH /organizations/:organizationId - Update organization
  */
-organizationRouter.put(
+organizationRouter.patch(
 	"/:organizationId",
 	requireOrganizationPermission("organization", "update"),
 	zValidator("json", updateOrganizationSchema),
@@ -276,10 +266,6 @@ organizationRouter.post(
 		const { email, role } = c.req.valid("json");
 		const user = c.get("user");
 
-		if (!user) {
-			throw new HTTPException(401, { message: "Authentication required" });
-		}
-
 		try {
 			// Use Better Auth API to invite member
 			const invitation = await auth.api.createInvitation({
@@ -297,7 +283,7 @@ organizationRouter.post(
 				operation: "invite_member",
 				organizationId,
 				inviteData: { email, role },
-				inviterId: user.id,
+				inviterId: user?.id,
 			});
 			throw new HTTPException(500, { message: "Failed to invite member" });
 		}
@@ -305,28 +291,24 @@ organizationRouter.post(
 );
 
 /**
- * PUT /organizations/:organizationId/members/:memberId - Update member role
+ * PATCH /organizations/:organizationId/members/:userId - Update member role
  */
-organizationRouter.put(
-	"/:organizationId/members/:memberId",
+organizationRouter.patch(
+	"/:organizationId/members/:userId",
 	requireOrganizationPermission("member", "update"),
 	zValidator("json", updateMemberRoleSchema),
 	async (c) => {
 		const organizationId = c.req.param("organizationId");
-		const memberId = c.req.param("memberId");
+		const userId = c.req.param("userId");
 		const { role } = c.req.valid("json");
 		const user = c.get("user");
-
-		if (!user) {
-			throw new HTTPException(401, { message: "Authentication required" });
-		}
 
 		try {
 			// Use Better Auth API to update member role
 			const member = await auth.api.updateMemberRole({
 				body: {
 					organizationId,
-					memberId: memberId,
+					memberId: userId,
 					role,
 				},
 				headers: c.req.raw.headers,
@@ -337,9 +319,9 @@ organizationRouter.put(
 			logError(error as Error, {
 				operation: "update_member_role",
 				organizationId,
-				memberId,
+				memberId: userId,
 				newRole: role,
-				updatedBy: user.id,
+				updatedBy: user?.id,
 			});
 			throw new HTTPException(500, { message: "Failed to update member role" });
 		}
@@ -347,21 +329,21 @@ organizationRouter.put(
 );
 
 /**
- * DELETE /organizations/:organizationId/members/:memberId - Remove member
+ * DELETE /organizations/:organizationId/members/:userId - Remove member
  */
 organizationRouter.delete(
-	"/:organizationId/members/:memberId",
+	"/:organizationId/members/:userId",
 	requireOrganizationPermission("member", "delete"),
 	async (c) => {
 		const organizationId = c.req.param("organizationId");
-		const memberId = c.req.param("memberId");
+		const userId = c.req.param("userId");
 
 		try {
 			// Use Better Auth API to remove member
 			await auth.api.removeMember({
 				body: {
 					organizationId,
-					memberIdOrEmail: memberId,
+					memberIdOrEmail: userId,
 				},
 				headers: c.req.raw.headers,
 			});
@@ -371,7 +353,7 @@ organizationRouter.delete(
 			logError(error as Error, {
 				operation: "remove_member",
 				organizationId,
-				memberId,
+				memberId: userId,
 			});
 			throw new HTTPException(500, { message: "Failed to remove member" });
 		}
@@ -571,6 +553,47 @@ organizationRouter.get(
 );
 
 /**
+ * PATCH /organizations/:organizationId/teams/:teamId - Update team
+ */
+organizationRouter.patch(
+	"/:organizationId/teams/:teamId",
+	requireOrganizationPermission("team", "update"),
+	zValidator("json", createTeamSchema), // Reuse schema since it only has name
+	async (c) => {
+		const organizationId = c.req.param("organizationId");
+		const teamId = c.req.param("teamId");
+		const { name } = c.req.valid("json");
+
+		try {
+			const team = await prisma.team.update({
+				where: {
+					id: teamId,
+					organizationId,
+				},
+				data: { name },
+				include: {
+					_count: {
+						select: {
+							members: true,
+						},
+					},
+				},
+			});
+
+			return c.json({ team });
+		} catch (error) {
+			logError(error as Error, {
+				operation: "update_team",
+				organizationId,
+				teamId,
+				updateData: { name },
+			});
+			throw new HTTPException(500, { message: "Failed to update team" });
+		}
+	},
+);
+
+/**
  * DELETE /organizations/:organizationId/teams/:teamId - Delete team
  */
 organizationRouter.delete(
@@ -600,4 +623,5 @@ organizationRouter.delete(
 	},
 );
 
+export type AppType = typeof organizationRouter;
 export default organizationRouter;

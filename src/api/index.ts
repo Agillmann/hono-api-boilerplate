@@ -32,20 +32,11 @@ apiRouter.use("*", async (c, next) => {
 	await next();
 });
 
-// Add system and health routes
 apiRouter.route("/", systemRouter);
-
-// Public routes (no authentication required)
 apiRouter.route("/auth", authRouter);
 apiRouter.route("/docs", docsRouter);
-
-// Protected routes (authentication required)
 apiRouter.route("/me", meRouter);
-
-// Admin routes (require admin role)
 apiRouter.route("/admin", adminRouter);
-
-// Organization routes (require authentication + organization membership)
 apiRouter.route("/organizations", organizationRouter);
 
 export default apiRouter;

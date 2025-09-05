@@ -64,7 +64,9 @@ export function hasPermission(
 	action: string,
 ): boolean {
 	const rolePerms = rolePermissions[role];
-	const resourcePerms = rolePerms[resource] as readonly string[] | undefined;
+	const resourcePerms = (rolePerms as any)[resource] as
+		| readonly string[]
+		| undefined;
 	return resourcePerms ? resourcePerms.includes(action) : false;
 }
 

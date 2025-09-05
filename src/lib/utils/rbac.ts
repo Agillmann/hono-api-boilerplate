@@ -284,7 +284,7 @@ export async function canPerformAction(
 	} catch (error) {
 		logError(error as Error, {
 			operation: "check_action_permission",
-			user,
+			userId,
 			resource,
 			action,
 			organizationId,

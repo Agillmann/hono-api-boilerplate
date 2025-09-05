@@ -1,4 +1,4 @@
-import pino from "pino";
+import pino, { type LoggerOptions } from "pino";
 import { config } from "../config";
 
 // Log levels for different types of operations
@@ -70,9 +70,10 @@ const createTransports = () => {
 };
 
 // Base logger configuration
-const isDevelopment = config.NODE_ENV === "development" || config.NODE_ENV === "test";
+const isDevelopment =
+	config.NODE_ENV === "development" || config.NODE_ENV === "test";
 
-const baseLoggerConfig: any = {
+const baseLoggerConfig: LoggerOptions = {
 	level: isDevelopment ? "debug" : "info",
 	timestamp: pino.stdTimeFunctions.isoTime,
 	serializers: {
@@ -93,10 +94,10 @@ const baseLoggerConfig: any = {
 			},
 		}),
 		err: pino.stdSerializers.err,
-		user: (user: any) => ({
-			id: user?.id,
-			email: user?.email,
-			role: user?.role,
+		user: (user: unknown) => ({
+			id: (user as any)?.id,
+			email: (user as any)?.email,
+			role: (user as any)?.role,
 		}),
 	},
 	transport: createTransports(),
@@ -123,7 +124,7 @@ export const authLogger = logger.child({ component: "auth" });
 export const adminLogger = logger.child({ component: "admin" });
 
 // Utility functions for common logging patterns
-export const logError = (error: Error, context?: Record<string, any>) => {
+export const logError = (error: Error, context?: Record<string, unknown>) => {
 	errorLogger.error(
 		{
 			err: error,
@@ -138,7 +139,7 @@ export const logApiCall = (
 	path: string,
 	statusCode: number,
 	duration: number,
-	context?: Record<string, any>,
+	context?: Record<string, unknown>,
 ) => {
 	apiLogger.info(
 		{
@@ -155,7 +156,7 @@ export const logApiCall = (
 export const logAuthEvent = (
 	event: string,
 	user?: { id?: string; email?: string },
-	context?: Record<string, any>,
+	context?: Record<string, unknown>,
 ) => {
 	authLogger.info(
 		{
@@ -171,7 +172,7 @@ export const logAdminAction = (
 	action: string,
 	adminUser: { id?: string; email?: string },
 	targetResource?: string,
-	context?: Record<string, any>,
+	context?: Record<string, unknown>,
 ) => {
 	adminLogger.warn(
 		{
@@ -186,7 +187,7 @@ export const logAdminAction = (
 
 export const logSystemEvent = (
 	event: string,
-	context?: Record<string, any>,
+	context?: Record<string, unknown>,
 ) => {
 	systemLogger.info(
 		{

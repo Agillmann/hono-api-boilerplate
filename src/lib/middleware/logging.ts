@@ -51,7 +51,8 @@ export const requestLoggingMiddleware = (): MiddlewareHandler => {
 		);
 
 		let statusCode = 200;
-		let errorDetails: any = null;
+		let errorDetails: { name: string; message: string; stack?: string } | null =
+			null;
 
 		try {
 			await next();
@@ -60,7 +61,7 @@ export const requestLoggingMiddleware = (): MiddlewareHandler => {
 			// Capture error details for logging
 			statusCode =
 				error instanceof Error && "status" in error
-					? (error as any).status || 500
+					? (error as Error & { status?: number }).status || 500
 					: 500;
 
 			errorDetails = {

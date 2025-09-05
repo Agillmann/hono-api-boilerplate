@@ -5,7 +5,7 @@ import { prisma } from "prisma/prisma-client";
 import { z } from "zod";
 import type { AuthType } from "../lib/auth";
 import { getUserOrganizations, getUserWithRole } from "../lib/utils/rbac";
-import { apiLogger, logError } from "../services/logger";
+import { logError } from "../services/logger";
 
 const meRouter = new Hono<{ Variables: AuthType }>();
 

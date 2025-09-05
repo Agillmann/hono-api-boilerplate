@@ -1,13 +1,14 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import type { Prisma } from "prisma/generated/prisma-client";
 import { prisma } from "prisma/prisma-client";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { AuthType } from "../lib/auth";
 import { auth } from "../lib/auth";
 import { requireRole } from "../lib/middleware/rbac";
 import { getUserWithRole } from "../lib/utils/rbac";
-import { adminLogger, logAdminAction, logError } from "../services/logger";
+import { logAdminAction, logError } from "../services/logger";
 
 const adminRouter = new Hono<{ Variables: AuthType }>();
 
@@ -48,14 +49,14 @@ const createOrganizationSchema = z.object({
  * GET /admin/users - List all users with pagination
  */
 adminRouter.get("/users", async (c) => {
-	const page = parseInt(c.req.query("page") || "1");
-	const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
+	const page = parseInt(c.req.query("page") || "1", 10);
+	const limit = Math.min(parseInt(c.req.query("limit") || "20", 10), 100);
 	const search = c.req.query("search") || "";
 	const role = c.req.query("role") || "";
 	const banned = c.req.query("banned");
 
 	try {
-		const where: any = {};
+		const where: Prisma.UserWhereInput = {};
 
 		if (search) {
 			where.OR = [
@@ -205,9 +206,17 @@ adminRouter.post("/users", zValidator("json", createUserSchema), async (c) => {
 			});
 		}
 
-		logAdminAction("create_user", c.get("user"), `user:${data.email}`, {
-			userRole: data.role,
-		});
+		const adminUser = c.get("user");
+		logAdminAction(
+			"create_user",
+			adminUser
+				? { id: adminUser.id, email: adminUser.email }
+				: { id: undefined, email: undefined },
+			`user:${data.email}`,
+			{
+				userRole: data.role,
+			},
+		);
 		return c.json({ user: result.user }, 201);
 	} catch (error) {
 		logError(error as Error, {
@@ -259,9 +268,17 @@ adminRouter.put(
 				},
 			});
 
-			logAdminAction("update_user", c.get("user"), `user:${userId}`, {
-				updates: data,
-			});
+			const adminUser = c.get("user");
+			logAdminAction(
+				"update_user",
+				adminUser
+					? { id: adminUser.id, email: adminUser.email }
+					: { id: undefined, email: undefined },
+				`user:${userId}`,
+				{
+					updates: data,
+				},
+			);
 			return c.json({ user });
 		} catch (error) {
 			logError(error as Error, {
@@ -300,10 +317,18 @@ adminRouter.post(
 			});
 
 			const user = await getUserWithRole(userId);
-			logAdminAction("ban_user", c.get("user"), `user:${userId}`, {
-				reason,
-				expiresAt,
-			});
+			const adminUser = c.get("user");
+			logAdminAction(
+				"ban_user",
+				adminUser
+					? { id: adminUser.id, email: adminUser.email }
+					: { id: undefined, email: undefined },
+				`user:${userId}`,
+				{
+					reason,
+					expiresAt,
+				},
+			);
 			return c.json({ user });
 		} catch (error) {
 			logError(error as Error, {
@@ -329,7 +354,14 @@ adminRouter.post("/users/:id/unban", async (c) => {
 			headers: c.req.raw.headers,
 		});
 
-		logAdminAction("unban_user", c.get("user"), `user:${userId}`);
+		const adminUser = c.get("user");
+		logAdminAction(
+			"unban_user",
+			adminUser
+				? { id: adminUser.id, email: adminUser.email }
+				: { id: undefined, email: undefined },
+			`user:${userId}`,
+		);
 		const user = await getUserWithRole(userId);
 		return c.json({ user });
 	} catch (error) {
@@ -359,7 +391,14 @@ adminRouter.delete("/users/:id", async (c) => {
 			where: { id: userId },
 		});
 
-		logAdminAction("delete_user", c.get("user"), `user:${userId}`);
+		const adminUser = c.get("user");
+		logAdminAction(
+			"delete_user",
+			adminUser
+				? { id: adminUser.id, email: adminUser.email }
+				: { id: undefined, email: undefined },
+			`user:${userId}`,
+		);
 		return c.json({ message: "User deleted successfully" });
 	} catch (error) {
 		logError(error as Error, {
@@ -379,12 +418,12 @@ adminRouter.delete("/users/:id", async (c) => {
  * GET /admin/organizations - List all organizations
  */
 adminRouter.get("/organizations", async (c) => {
-	const page = parseInt(c.req.query("page") || "1");
-	const limit = Math.min(parseInt(c.req.query("limit") || "20"), 100);
+	const page = parseInt(c.req.query("page") || "1", 10);
+	const limit = Math.min(parseInt(c.req.query("limit") || "20", 10), 100);
 	const search = c.req.query("search") || "";
 
 	try {
-		const where: any = {};
+		const where: Prisma.OrganizationWhereInput = {};
 
 		if (search) {
 			where.OR = [
@@ -540,9 +579,12 @@ adminRouter.post(
 				headers: c.req.raw.headers,
 			});
 
+			const adminUser = c.get("user");
 			logAdminAction(
 				"create_organization",
-				c.get("user"),
+				adminUser
+					? { id: adminUser.id, email: adminUser.email }
+					: { id: undefined, email: undefined },
 				`organization:${data.slug}`,
 				{
 					name: data.name,
@@ -580,9 +622,12 @@ adminRouter.delete("/organizations/:id", async (c) => {
 			headers: c.req.raw.headers,
 		});
 
+		const adminUser = c.get("user");
 		logAdminAction(
 			"delete_organization",
-			c.get("user"),
+			adminUser
+				? { id: adminUser.id, email: adminUser.email }
+				: { id: undefined, email: undefined },
 			`organization:${organizationId}`,
 		);
 		return c.json({ message: "Organization deleted successfully" });

@@ -1,7 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
-import { errorLogger, logError } from "../../services/logger";
+import { logError } from "../../services/logger";
 import type { RBACContext } from "../auth";
 import { auth } from "../auth";
 import {
@@ -273,7 +273,7 @@ export function requireOrganizationRole(
 		} catch (error) {
 			logError(error as Error, {
 				operation: "organization_role_check",
-				requiredRole,
+				requiredRoles: roles,
 				organizationId: c.req.param("organizationId"),
 				user: c.get("user"),
 			});

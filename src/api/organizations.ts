@@ -14,7 +14,7 @@ import {
 	getOrganizationWithUserRole,
 	getUserAccessibleOrganizations,
 } from "../lib/utils/rbac";
-import { apiLogger, logError } from "../services/logger";
+import { logError } from "../services/logger";
 
 const organizationRouter = new Hono<{ Variables: RBACContext }>();
 
@@ -238,7 +238,7 @@ organizationRouter.get(
 		const organizationId = c.req.param("organizationId");
 
 		try {
-			const members = await prisma.organizationMember.findMany({
+			const members = await prisma.member.findMany({
 				where: { organizationId },
 				include: {
 					user: {
@@ -282,7 +282,7 @@ organizationRouter.post(
 
 		try {
 			// Use Better Auth API to invite member
-			const invitation = await auth.api.inviteUser({
+			const invitation = await auth.api.createInvitation({
 				body: {
 					organizationId,
 					email,
@@ -326,7 +326,7 @@ organizationRouter.put(
 			const member = await auth.api.updateMemberRole({
 				body: {
 					organizationId,
-					userId: memberId,
+					memberId: memberId,
 					role,
 				},
 				headers: c.req.raw.headers,
@@ -361,7 +361,7 @@ organizationRouter.delete(
 			await auth.api.removeMember({
 				body: {
 					organizationId,
-					userId: memberId,
+					memberIdOrEmail: memberId,
 				},
 				headers: c.req.raw.headers,
 			});

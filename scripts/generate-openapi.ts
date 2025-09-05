@@ -68,7 +68,7 @@ async function generateOpenAPISpec() {
 /**
  * Generate pretty formatted OpenAPI spec (YAML)
  */
-async function generateYAMLSpec(spec: any) {
+async function generateYAMLSpec(spec: Record<string, unknown>) {
 	try {
 		console.log("📝 Generating YAML specification...");
 

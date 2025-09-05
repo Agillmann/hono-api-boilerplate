@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { AuthType } from "../lib/auth";
 import { getUserOrganizations, getUserWithRole } from "../lib/utils/rbac";
 import { logError } from "../services/logger";
@@ -11,8 +11,8 @@ const meRouter = new Hono<{ Variables: AuthType }>();
 
 // Validation schemas
 const updateProfileSchema = z.object({
-	name: z.string().min(1, "Name is required").optional(),
-	email: z.string().email("Invalid email address").optional(),
+	name: z.string().min(1, { error: "Name is required" }).optional(),
+	email: z.email({ error: "Invalid email address" }).optional(),
 });
 
 /**

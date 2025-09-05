@@ -17,28 +17,30 @@ adminRouter.use("*", requireRole("admin"));
 
 // Validation schemas
 const createUserSchema = z.object({
-	name: z.string().min(1, "Name is required"),
-	email: z.string().email("Invalid email address"),
-	password: z.string().min(8, "Password must be at least 8 characters"),
+	name: z.string().min(1, { error: "Name is required" }),
+	email: z.email({ error: "Invalid email address" }),
+	password: z
+		.string()
+		.min(8, { error: "Password must be at least 8 characters" }),
 	role: z.enum(["user", "admin"]).optional().default("user"),
 });
 
 const updateUserSchema = z.object({
 	name: z.string().min(1).optional(),
-	email: z.string().email().optional(),
+	email: z.email().optional(),
 	role: z.enum(["user", "admin"]).optional(),
 });
 
 const banUserSchema = z.object({
-	reason: z.string().min(1, "Ban reason is required"),
-	expiresAt: z.string().datetime().optional(),
+	reason: z.string().min(1, { error: "Ban reason is required" }),
+	expiresAt: z.iso.datetime().optional(),
 });
 
 const createOrganizationSchema = z.object({
-	name: z.string().min(1, "Organization name is required"),
-	slug: z.string().min(1, "Organization slug is required").max(255),
-	logo: z.string().url().optional(),
-	ownerId: z.string().cuid("Invalid user ID"),
+	name: z.string().min(1, { error: "Organization name is required" }),
+	slug: z.string().min(1, { error: "Organization slug is required" }).max(255),
+	logo: z.url().optional(),
+	ownerId: z.cuid({ error: "Invalid user ID" }),
 });
 
 // =============================================================================

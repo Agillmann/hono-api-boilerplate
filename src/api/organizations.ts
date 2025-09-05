@@ -2,7 +2,7 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "prisma/prisma-client";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { RBACContext } from "../lib/auth";
 import { auth } from "../lib/auth";
 import {
@@ -20,18 +20,18 @@ const organizationRouter = new Hono<{ Variables: RBACContext }>();
 
 // Validation schemas
 const createOrganizationSchema = z.object({
-	name: z.string().min(1, "Organization name is required"),
-	slug: z.string().min(1, "Organization slug is required").max(255),
-	logo: z.string().url().optional(),
+	name: z.string().min(1, { error: "Organization name is required" }),
+	slug: z.string().min(1, { error: "Organization slug is required" }).max(255),
+	logo: z.url().optional(),
 });
 
 const updateOrganizationSchema = z.object({
 	name: z.string().min(1).optional(),
-	logo: z.string().url().optional(),
+	logo: z.url().optional(),
 });
 
 const inviteMemberSchema = z.object({
-	email: z.string().email("Invalid email address"),
+	email: z.email({ error: "Invalid email address" }),
 	role: z.enum(["member", "admin"]).default("member"),
 });
 
@@ -40,7 +40,7 @@ const updateMemberRoleSchema = z.object({
 });
 
 const createTeamSchema = z.object({
-	name: z.string().min(1, "Team name is required"),
+	name: z.string().min(1, { error: "Team name is required" }),
 });
 
 // =============================================================================

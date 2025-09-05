@@ -28,7 +28,10 @@
 			"name": "Health",
 			"description": "Health check and system status endpoints"
 		},
-		{ "name": "System", "description": "System information and statistics" },
+		{
+			"name": "Documentation",
+			"description": "Interactive API documentation endpoints"
+		},
 		{
 			"name": "Authentication",
 			"description": "Better-Auth managed authentication endpoints"
@@ -115,17 +118,76 @@
 				}
 			}
 		},
-		"/health/better-auth": {
+		"/docs": {
 			"get": {
-				"tags": ["Health"],
-				"summary": "Better-Auth Health Check",
-				"description": "Check Better-Auth connectivity and status",
+				"tags": ["Documentation"],
+				"summary": "Interactive API Documentation",
+				"description": "Serve interactive API documentation with Scalar UI",
 				"responses": {
 					"200": {
-						"description": "Better-Auth is connected",
+						"description": "Interactive documentation page",
+						"content": {
+							"text/html": {
+								"schema": {
+									"type": "string",
+									"example": "<!DOCTYPE html>..."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/docs/openapi.json": {
+			"get": {
+				"tags": ["Documentation"],
+				"summary": "OpenAPI Specification",
+				"description": "Get the OpenAPI 3.0 specification for this API",
+				"responses": {
+					"200": {
+						"description": "OpenAPI specification",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/Health" }
+								"schema": {
+									"type": "object",
+									"description": "OpenAPI 3.0 specification"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Failed to load specification",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/Error" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/docs/auth-openapi.json": {
+			"get": {
+				"tags": ["Documentation"],
+				"summary": "Better-Auth OpenAPI Specification",
+				"description": "Get the Better-Auth OpenAPI specification",
+				"responses": {
+					"200": {
+						"description": "Better-Auth OpenAPI specification",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Better-Auth OpenAPI 3.0 specification"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Failed to load Better-Auth specification",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/Error" }
 							}
 						}
 					}

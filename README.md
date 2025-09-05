@@ -152,7 +152,8 @@ user.hasSystemRole('admin')
 
 | Category | Base Path | Authentication | Description |
 |----------|-----------|----------------|-------------|
-| **System** | `/api/v1/health/*` | Public | Health checks, system stats |
+| **System** | `/api/v1/health/*` | Public | Health checks and system status |
+| **Documentation** | `/api/v1/docs/*` | Public | Interactive API documentation with Scalar UI |
 | **Auth** | `/api/v1/auth/*` | Public | Better-Auth endpoints (auto-generated) |
 | **User** | `/api/v1/me/*` | Session Required | User profile, organizations, invitations |
 | **Organizations** | `/api/v1/organizations/*` | Session + Membership | Multi-tenant org management |
@@ -242,8 +243,8 @@ bun run db:reset         # Reset database (⚠️ destroys data)
 ```bash
 bun run lint             # Run BiomeJS linter
 bun run lint:fix         # Auto-fix linting issues
-bun run gen:openapi      # Generate OpenAPI spec
-bun run gen:docs         # Generate API documentation
+bun run typecheck        # Run TypeScript type checking
+bun run gen:sdk          # Generate SDK client from OpenAPI spec
 ```
 
 ### Docker Operations
@@ -348,13 +349,29 @@ curl http://localhost:3000/api/v1/system/permissions -b cookies.txt
 | **[📝 Logging Guide](./docs/logging.md)** | Logging system & monitoring setup | Production debugging & monitoring |
 | **[🗺️ Documentation Index](./docs/README.md)** | Navigation & architecture overview | Understanding system design |
 
-### Auto-Generated Documentation
+### Interactive API Documentation
+
+The API includes comprehensive interactive documentation powered by Scalar UI:
 
 ```bash
-# Generate and view OpenAPI docs
-bun run gen:openapi
-# Visit: http://localhost:3000/api/v1/auth/reference
+# Access interactive documentation
+open http://localhost:3000/api/v1/docs
+
+# View OpenAPI specification
+open http://localhost:3000/api/v1/docs/openapi.json
+
+# Better-Auth specific docs
+open http://localhost:3000/api/v1/docs/auth-openapi.json
+
+# Generate SDK client
+bun run gen:sdk
 ```
+
+The documentation includes:
+- **Interactive API explorer** with request/response examples
+- **Authentication guide** with Better-Auth integration
+- **RBAC documentation** explaining permissions and roles
+- **Schema validation** showing Zod validation rules
 
 ## 🗂️ Project Structure
 
@@ -362,11 +379,19 @@ bun run gen:openapi
 src/
 ├── index.ts                    # Application entry point + main router
 ├── config.ts                   # Environment configuration
-├── api/                        # API route handlers
-│   ├── auth.ts                # Better-Auth integration
-│   ├── me.ts                  # User profile routes  
-│   ├── admin.ts               # Admin management routes
-│   └── organizations.ts       # Organization & team routes
+├── api/                        # API route handlers organized by feature
+│   ├── index.ts               # Main router combining all sub-routers
+│   ├── auth/                  # Authentication routes
+│   │   ├── auth.ts            # Better-Auth integration handler
+│   │   └── me.ts              # User profile routes
+│   ├── admin/                 # Administration routes
+│   │   ├── admin.ts           # Global admin routes (user mgmt, stats)
+│   │   └── organizations.ts   # Admin organization oversight
+│   ├── system/                # System routes
+│   │   └── index.ts           # Health checks and system info
+│   └── docs/                  # Documentation routes
+│       ├── index.ts           # Interactive API docs with Scalar UI
+│       └── openapi.json       # OpenAPI 3.0 specification
 ├── lib/                       # Core libraries
 │   ├── auth.ts                # Better-Auth configuration
 │   ├── permissions.ts         # RBAC permission definitions

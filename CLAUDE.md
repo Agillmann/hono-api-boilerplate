@@ -17,7 +17,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `bun run db:push` - Push schema changes to database
 - `bun run db:pull` - Pull schema from database
 - `bun run db:reset` - Reset database (⚠️ destroys all data)
-- `bun run gen:openapi` - Generate OpenAPI documentation
+- `bun run gen:sdk` - Generate SDK client from OpenAPI spec
+- `bun run typecheck` - Run TypeScript type checking
 
 ## Database Setup
 
@@ -58,11 +59,18 @@ This is a Hono-based REST API with TypeScript, built around a comprehensive RBAC
 - `src/lib/middleware/rbac.ts` - RBAC middleware for permission checking
 - `src/lib/utils/rbac.ts` - RBAC utility functions and helpers
 - `src/api/` - API route handlers organized by feature:
-  - `src/api/index.ts` - Main router with system endpoints
-  - `src/api/auth.ts` - Authentication routes (Better-Auth)
-  - `src/api/me.ts` - User profile and personal data routes
-  - `src/api/admin.ts` - Global admin routes (user/org management)
-  - `src/api/organizations.ts` - Multi-tenant organization routes
+  - `src/api/index.ts` - Main router that combines all sub-routers
+  - `src/api/auth/` - Authentication routes:
+    - `auth.ts` - Better-Auth integration handler
+    - `me.ts` - User profile and personal data routes
+  - `src/api/admin/` - Administration routes:
+    - `admin.ts` - Global admin routes (user management, system stats)
+    - `organizations.ts` - Admin organization oversight routes
+  - `src/api/system/` - System routes:
+    - `index.ts` - Health checks and system information
+  - `src/api/docs/` - Documentation routes:
+    - `index.ts` - Interactive API docs with Scalar UI
+    - `openapi.json` - OpenAPI 3.0 specification
 - `src/services/logger.ts` - Pino logger configuration
 - `prisma/schema.prisma` - Prisma database schema
 - `prisma/generated/prisma-client/` - Generated Prisma client
@@ -95,18 +103,20 @@ Better-Auth is configured with:
 - OpenAPI documentation at `/api/v1/auth/reference`
 
 ### API Structure
-- **Public routes**: `/api/v1/health/*`, `/api/v1/system/stats`, `/api/v1/auth/*`
+- **Public routes**: `/api/v1/health/*`, `/api/v1/auth/*`, `/api/v1/docs/*`
 - **User routes**: `/api/v1/me/*` (require authentication)
 - **Admin routes**: `/api/v1/admin/*` (require admin role)
 - **Organization routes**: `/api/v1/organizations/*` (require organization membership + permissions)
-- **System routes**: `/api/v1/system/*` (mixed authentication levels)
+- **System routes**: `/api/v1/health/*` (public health checks)
+- **Documentation routes**: `/api/v1/docs/*` (interactive API documentation)
 
 #### Route Categories
-1. **Health & System**: Public health checks and system statistics
-2. **Authentication**: Better-Auth managed routes with session handling
-3. **User Profile**: Personal data management and user-specific resources
-4. **Administration**: Global user and organization management (admin only)
-5. **Organizations**: Multi-tenant features with granular permissions
+1. **Health & System**: Public health checks (`/health/api`, `/health/db`)
+2. **Authentication**: Better-Auth managed routes with session handling (`/auth/*`)
+3. **Documentation**: Interactive API docs with Scalar UI (`/docs/`, `/docs/openapi.json`)
+4. **User Profile**: Personal data management and user-specific resources (`/me/*`)
+5. **Administration**: Global user and organization management (admin only) (`/admin/*`)
+6. **Organizations**: Multi-tenant features with granular permissions (`/organizations/*`)
 
 ### Path Aliases
 The project uses TypeScript path aliases:
